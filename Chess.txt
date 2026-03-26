@@ -1,0 +1,24 @@
+2026-03-25 20:32:18.145619
+[
+ {
+  "player": "White",
+  "type": "pawn",
+  "id": "p4",
+  "col": "d",
+  "row": 4
+ },
+ {
+  "player": "Black",
+  "type": "pawn",
+  "id": "p5",
+  "col": "e",
+  "row": 3
+ },
+ {
+  "player": "White",
+  "type": "pawn",
+  "id": "p6",
+  "col": "f",
+  "row": 4
+ }
+]
