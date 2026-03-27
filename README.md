@@ -1,5 +1,5 @@
 # chess
-Computer based chess with AI agents
+Computer based chess with AI agents (**comming soon **)
 
 Contains two files:
 
