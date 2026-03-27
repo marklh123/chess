@@ -1,4 +1,4 @@
-# chess
+# Chess by Mark
 Computer based chess with AI agents (**comming soon **)
 
 Contains two files:
