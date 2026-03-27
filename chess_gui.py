@@ -9,6 +9,11 @@ from constants import pos_to_pixel
 
 
 def get_pixels(pos):
+    """
+
+    :param pos:
+    :return:
+    """
     row_pixel = constants.pos_to_pixel[pos[0]]
     col_pixel = constants.pos_to_pixel[pos[1]]
 
