@@ -1,4 +1,4 @@
-from Project_Pygame_Chess import constants
+import constants
 import datetime
 import json
 
