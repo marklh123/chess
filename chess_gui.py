@@ -10,7 +10,7 @@ from constants import pos_to_pixel
 
 def get_pixels(pos):
     """
-
+    Some comment
     :param pos:
     :return:
     """
