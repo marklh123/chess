@@ -432,10 +432,18 @@ def Takes(opponent,piece):
 def Castling(black, white, letter_index, index_letter,
              xx, col,
              new_col, new_row, your_color):
-
-
-        # check if it moved 2 squares right (king-side)
-
+        """
+            Detects if you can castle
+            :param black: black pieces, you or opponent
+            :param white: white pieces, you or opponent
+            :param letter_index: dictionary
+            :param index_letter: dictionary
+            :param xx: original row as a digit
+            :param col: original colum as a digit
+            :param new_col: attempted move column as a digit
+            :param new_row: attempted move row as a digit
+            :param your_color: black or white
+             """
 
         if (([new_row, letter_index[new_col]] != [xx, (letter_index[col] + 2)]) and
                 ([new_row, letter_index[new_col]] != [xx, (letter_index[col] - 2)])):
