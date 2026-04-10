@@ -449,7 +449,7 @@ def Castling(black, white, letter_index, index_letter,
                 ([new_row, letter_index[new_col]] != [xx, (letter_index[col] - 2)])):
                 return "not_castling"
 
-        #trt to do castling
+        # king-side castling
         if [new_row, letter_index[new_col]] == [xx, (letter_index[col] + 2)]:
             targets = [(xx, (letter_index[col] + 1)), (xx, (letter_index[col] + 2))]
             # targets are 2 empty spaces between rook and king king-side
