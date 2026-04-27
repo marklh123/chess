@@ -454,7 +454,6 @@ def Takes(opponent,piece):
          """
 
     for op in opponent:
-        # checks through all pieces in opponents pieces
         if op['pos'] == piece['pos']:
             opponent.remove(op)
             break
