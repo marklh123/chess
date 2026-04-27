@@ -498,8 +498,6 @@ def Castling(black, white, letter_index, index_letter,
                         break
 
                 if rook:
-                    # if so then move rook pos
-
                     new_rook_col = (letter_index[col] + 1)
 
                     rook["pos"] = [xx, index_letter[new_rook_col]]
