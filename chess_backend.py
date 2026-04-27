@@ -562,7 +562,7 @@ def is_your_king_in_check(you, opponent,
     if captured_piece:
         opponent_sim.remove(captured_piece)
 
-    #
+
     your_king = [piece for piece in you_sim if piece["type"] == "king"][0]
     king_row = your_king["pos"][0]
     king_col = letter_index[your_king["pos"][1]]
