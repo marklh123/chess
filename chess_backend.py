@@ -570,8 +570,6 @@ def is_your_king_in_check(you, opponent,
     moved_piece["pos"] = [new_row, new_col]
 
     #if new move is take, remove the captured piece from opponent
-    # opponent_sim = copy.deepcopy(opponent)
-    # instead of copy.deepcopy(opponent)
     opponent_sim = [{"id": p["id"], "type": p["type"], "pos": list(p["pos"]),
                      "color": p["color"], "move": p["move"], "rule": p["rule"]} for p in opponent]
     captured_piece = None
