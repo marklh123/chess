@@ -384,7 +384,6 @@ black = [
         {"id": "k", "type": "king", "symbol": "♚", "pos": [0, "e"], "move": 0, "rule": rule_for_king,
          "color": "black", "image": constants.black_king},
     ]
-
 white = [
         {"id": "p1", "type": "pawn", "symbol": "♙", "pos": [6, "a"], "move": 0, "rule": rule_for_pawn,
          "color": "white",  "image": constants.white_pawn},
