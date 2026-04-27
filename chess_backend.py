@@ -306,6 +306,14 @@ def rule_for_king(you,opponent,king):
     return new_pos
 
 def rule_for_knight(you,opponent,knight):
+    """
+        Find all possible moves for knight
+        :param you: your color, black or white
+        :param opponent: opponent color, black or white
+        :param knight: selected knight
+        :return: list of possible moves by the knight
+        """
+
     letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
     index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
