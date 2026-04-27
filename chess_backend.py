@@ -123,8 +123,8 @@ def rule_for_rook(you, opponent,rook):
     #
     new_pos = []
     directions = [(1,0), (-1,0), (0,1), (0,-1)]
-    #down, up, right, left
-    #
+
+
     for dr, dc in directions:
         # first iteration is (1,0) so dr = 1 and dc = 0 then (-1,0) so dr = -1 and dc = 0 and so on
         r = row
