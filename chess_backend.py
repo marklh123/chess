@@ -457,7 +457,6 @@ def Takes(opponent,piece):
         if op['pos'] == piece['pos']:
             opponent.remove(op)
             break
-    # checks if the position has an enemy piece and if so removes it and says that shits gone
 
 def Castling(black, white, letter_index, index_letter,
              xx, col,
