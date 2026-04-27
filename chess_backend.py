@@ -516,7 +516,6 @@ def Castling(black, white, letter_index, index_letter,
                 rook = None
                 for piece2 in your_color:
                     if (piece2["pos"] == [xx, index_letter[rook_col]]) and (piece2["type"] == "rook"):
-                        # checks if one of your rooks are on that position
                         rook = piece2
                         if piece2["move"] > 0:
                             return "cancel castling"
