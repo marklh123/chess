@@ -651,7 +651,6 @@ def is_opponents_next_moves_0(you, opponent):
 
     # 0 next moves
     if len(list_of_trues) == len(opponent_next_moves_passive) and len(opponent_next_moves_passive) > 0:
-        print("Checkmate, opponent")
         return True
     return False
 
