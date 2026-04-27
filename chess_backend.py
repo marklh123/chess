@@ -133,7 +133,6 @@ def rule_for_rook(you, opponent,rook):
         while True:
             # this loop keeps running until one of the break conditions are met
             r += dr
-            # row = row + direction row
             c += dc
 
             if c < 0 or c > 7:
