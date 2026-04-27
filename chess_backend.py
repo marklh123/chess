@@ -532,9 +532,10 @@ def Castling(black, white, letter_index, index_letter,
 
 def all_new_moves_opponent_for_check(player, other):
     """
-    :param player:
-    :param other:
-    :return:
+        Gets all possible take moves for your opponents next move
+        :param player: your color, black or white
+        :param other: opponent color, black or white
+        :return: list of all possible moves
     """
 
     # this function just gets all possible take moves for your opponents next move
