@@ -135,8 +135,6 @@ def rule_for_rook(you, opponent,rook):
             r += dr
             # row = row + direction row
             c += dc
-            # col = col + direction col
-            # keeps adding direction value to rook pos value
 
             if c < 0 or c > 7:
                 break
