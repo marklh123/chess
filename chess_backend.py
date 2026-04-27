@@ -534,8 +534,8 @@ def is_your_king_in_check(you, opponent,
     """
     The new move is not valid if it keeps or puts your king in check
 
-    :param you: board pieces for your color
-    :param opponent: board pieces for opponent
+    :param you: board pieces for your color, black or white
+    :param opponent: board pieces for opponent, black or white
     :param piece: your piece that moved
     :param new_row: your piece new row
     :param new_col: your piece new column
