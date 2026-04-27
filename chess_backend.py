@@ -451,7 +451,12 @@ def PawnPromotion(piece,new_row,col):
     # this checks if pawn is in back rank if it is it turns into a queen
 
 def Takes(opponent,piece):
-    # makes one of the list of dictionaries the opp pieces depending on what color the piece is
+    """
+        Detects if the moved piece takes an opponents piece
+        :param opponent: opponent color, black or white
+        :param piece: selected and moved piece
+         """
+
     for op in opponent:
         # checks through all pieces in opponents pieces
         if op['pos'] == piece['pos']:
