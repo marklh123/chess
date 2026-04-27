@@ -481,7 +481,6 @@ def Castling(black, white, letter_index, index_letter,
         # king-side castling
         if [new_row, letter_index[new_col]] == [xx, (letter_index[col] + 2)]:
             targets = [(xx, (letter_index[col] + 1)), (xx, (letter_index[col] + 2))]
-            # targets are 2 empty spaces between rook and king king-side
             occupied = [p["pos"] for p in black + white]
             # occupied is all occupied pieces on board for black and white
 
