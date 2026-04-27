@@ -483,6 +483,7 @@ def Castling(black, white, letter_index, index_letter,
             targets = [(xx, (letter_index[col] + 1)), (xx, (letter_index[col] + 2))]
             occupied = [p["pos"] for p in black + white]
 
+            # If all squares in targets are empty, then do the next step
             if all(t not in occupied for t in targets):
                 # If all squares in targets are empty, then do the next step
                 rook_col = (letter_index[col]) + 3
