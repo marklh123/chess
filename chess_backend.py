@@ -532,7 +532,7 @@ def all_new_moves_opponent_for_check(player, other):
 def is_your_king_in_check(you, opponent,
                           piece, new_row, new_col):
     """
-    The new move is not valid if keep or put your king in check
+    The new move is not valid if it keeps or puts your king in check
 
     :param you: board pieces for your color
     :param opponent: board pieces for opponent
