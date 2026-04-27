@@ -504,6 +504,7 @@ def Castling(black, white, letter_index, index_letter,
                     rook["move"] += 1
                     return "done castling"
 
+        # queen-side
         if [new_row, letter_index[new_col]] == [xx, (letter_index[col] - 2)]:
 
             # checks if king moved 2 squares left (queen-side)
