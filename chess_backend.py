@@ -570,7 +570,6 @@ def is_your_king_in_check(you, opponent,
     print(f"King Position:{king_pos}")
     print(f"All new moves in white: {all_new_moves_opponent_for_check(opponent_sim, you_sim)}")
     if king_pos in all_new_moves_opponent_for_check(opponent_sim, you_sim):
-        print("You cant go here because its a check. Try another move.")
         return True
     else:
         # if king isn't in check next move it can go forward and update the board
