@@ -222,7 +222,6 @@ def rule_for_queen(you,opponent,queen):
     new_pos = []
 
     directions = [(1, 1), (-1, 1), (1, -1), (-1, -1),(1,0), (-1,0), (0,1), (0,-1)]
-    # first 4 are diagonal directions, last 4 are straight directions
 
     for dr, dc in directions:
         r = row
