@@ -467,8 +467,6 @@ def Castling(black, white, letter_index, index_letter,
             Detects if you can castle
             :param black: black pieces, you or opponent
             :param white: white pieces, you or opponent
-            :param letter_index: dictionary
-            :param index_letter: dictionary
             :param xx: original row as a digit
             :param col: original colum as a digit
             :param new_col: attempted move column as a digit
