@@ -538,7 +538,6 @@ def all_new_moves_opponent_for_check(player, other):
         :return: list of all possible moves
     """
 
-    # this function just gets all possible take moves for your opponents next move
     all_new_moves_your_color = []
     for i in player: # player = white or black
         my_rule = i["rule"]
