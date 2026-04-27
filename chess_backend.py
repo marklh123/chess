@@ -30,7 +30,7 @@ def log_move(piece):
 
 def rule_for_pawn_takes(opponent, pawn):
     """
-    Find list of possible takes
+    Find all possible takes for pawn
     :param opponent: black or white
     :param pawn: selected pawn
     :return: takes by the pawn
@@ -50,12 +50,20 @@ def rule_for_pawn_takes(opponent, pawn):
 
         if (([op_row, op_col] == [pawn_row + direction, pawn_col + 1]) or
             ([op_row, op_col] == [pawn_row + direction, pawn_col - 1])):
-            print(f'take: {[op_row, op_col]}')
             takes.append([op_row, op_col])
 
     return takes
 
 def rule_for_pawn(you,opponent,pawn):
+    """
+        Find all possible non-take moves for pawn
+        :param you: your color, black or white
+        :param opponent: opponent color, black or white
+        :param pawn: selected pawn
+        :return: possible non-take moves by the pawn
+        """
+
+
     # basic rule for pawns: 1 up
     row, col_letter = pawn["pos"]
     col = letter_index[col_letter]
@@ -90,14 +98,12 @@ def rule_for_pawn(you,opponent,pawn):
         if len(new_pos) == 0:
             break
 
+        #if a piece is right in front of the pawn in which the pawn has zero possible moves
         if [row, col] == new_pos[0]:
-            print(f"first {piece['pos']} is taken, remove forward moves")
             new_pos = []
-            # new_pos[0] is if a piece is right in front of the pawn in which the pawn has zero possible moves
-            # that is why the list goes empty, the pawn can't move
 
+        # when a piece is 2 places in front of a pawn, gets rid of the 2 space move option
         if (len(new_pos)>1) and ([row, col] == new_pos[1]):
-            print (f'this {piece["pos"]} is taken')
             new_pos.remove([row, col])
 
 
@@ -167,6 +173,14 @@ def rule_for_rook(you, opponent,rook):
     # after going through while loop for all directions then all positions are collected and you can return
 
 def rule_for_bishop(you,opponent,bishop):
+    """
+           Find all possible moves for bishop
+           :param you: your color, black or white
+           :param opponent: opponent color, black or white
+           :param bishop: selected bishop
+           :return: list of possible moves by the bishop
+           """
+
     letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
     index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
