@@ -485,7 +485,6 @@ def Castling(black, white, letter_index, index_letter,
 
             # If all squares in targets are empty, then do the next step
             if all(t not in occupied for t in targets):
-                # If all squares in targets are empty, then do the next step
                 rook_col = (letter_index[col]) + 3
                 rook = None
                 for piece2 in your_color:
