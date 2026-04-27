@@ -509,7 +509,6 @@ def Castling(black, white, letter_index, index_letter,
 
             targets = [(xx, (letter_index[col] - 1)), (xx, (letter_index[col] - 2)), (xx, (letter_index[col] - 3))]
             occupied = [p["pos"] for p in black + white]
-            # occupied is all occupied pieces on board for black and white
 
             if all(t not in occupied for t in targets):
                 # If all squares in targets are empty, then do the next step
