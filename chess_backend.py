@@ -117,7 +117,7 @@ def rule_for_rook(you, opponent,rook):
 
     row, col_letter = rook["pos"]
     col = letter_index[col_letter]
-    #
+    
     your_color = you
     opponent_color = opponent
 
