@@ -567,8 +567,6 @@ def is_your_king_in_check(you, opponent,
     king_row = your_king["pos"][0]
     king_col = letter_index[your_king["pos"][1]]
     king_pos = [king_row, king_col]
-    print(f"King Position:{king_pos}")
-    print(f"All new moves in white: {all_new_moves_opponent_for_check(opponent_sim, you_sim)}")
     if king_pos in all_new_moves_opponent_for_check(opponent_sim, you_sim):
         return True
     else:
