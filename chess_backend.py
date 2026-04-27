@@ -99,8 +99,6 @@ def rule_for_pawn(you,opponent,pawn):
         if (len(new_pos)>1) and ([row, col] == new_pos[1]):
             print (f'this {piece["pos"]} is taken')
             new_pos.remove([row, col])
-            # this is when a piece is 2 places in front of a pawn, gets rid of the 2 space move option
-            # can still move 1 forward though
 
 
     takes = rule_for_pawn_takes(opponent, pawn)
