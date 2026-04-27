@@ -102,7 +102,7 @@ def rule_for_pawn(you,opponent,pawn):
             # this is when a piece is 2 places in front of a pawn, gets rid of the 2 space move option
             # can still move 1 forward though
 
-    print(f'available move (before take): {new_pos}')
+
     takes = rule_for_pawn_takes(opponent, pawn)
     #
     new_pos.extend(takes)
