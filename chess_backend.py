@@ -495,7 +495,6 @@ def Castling(black, white, letter_index, index_letter,
                         # cant castle if rook has already moved before
                         if piece2["move"] > 0:
                             return "cancel castling"
-                        # cant castle if rook has already moved before
                         break
 
                 if rook:
