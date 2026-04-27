@@ -420,6 +420,7 @@ white = [
          "color": "white",  "image": constants.white_king},
     ]
 
+
 def PawnPromotion(piece,new_row,col):
     """
         Detect if a pawn has reached back rank, promotes to queen if so
