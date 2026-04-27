@@ -433,7 +433,6 @@ def PawnPromotion(piece,new_row,col):
 
     if piece["color"] == "white" and piece["type"] == "pawn":
         if (new_row, letter_index[col]) in blackbackranks:
-            print("Ts pawn in back ranks so we gonna make it a queen")
             piece["symbol"] = "♕"
             piece["type"] = "queen"
             piece["image"] = constants.white_queen
