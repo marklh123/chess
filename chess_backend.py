@@ -445,7 +445,6 @@ def PawnPromotion(piece,new_row,col):
             piece["image"] = constants.black_queen
             piece["id"] = "qN"
             piece["rule"] = rule_for_queen
-    # this checks if pawn is in back rank if it is it turns into a queen
 
 def Takes(opponent,piece):
     """
