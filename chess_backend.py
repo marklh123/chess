@@ -202,6 +202,14 @@ def rule_for_bishop(you,opponent,bishop):
     return new_pos
 
 def rule_for_queen(you,opponent,queen):
+    """
+        Find all possible moves for queen
+        :param you: your color, black or white
+        :param opponent: opponent color, black or white
+        :param queen: selected queen
+        :return: list of possible moves by the queen
+        """
+
     letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
     index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
