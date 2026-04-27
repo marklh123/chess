@@ -593,13 +593,12 @@ def is_opponent_in_check(you, opponent):
         # can go forward and update the board
         return False
 
-def is_checkmate_opponent(you, opponent):
-    """
-
-    :param you:
-    :param opponent:
-    :return:
-    """
+def is_opponents_next_moves_0(you, opponent):
+    """ Detects if opponent has any possible next moves (used for checkmate and stalemate)
+        :param you: your color, black or white
+        :param opponent: opponent color, black or white
+        :return: if opponent doesn't have any next moves, True or False
+        """
     opponent_next_moves_passive = []
     for a in opponent:
         my_rule = a["rule"]
