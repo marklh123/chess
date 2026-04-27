@@ -541,7 +541,7 @@ def is_your_king_in_check(you, opponent,
     :param new_col: your piece new column
     :return: False if not in check, True if in check
     """
-    #update you_sim with new move
+
     you_sim = [{"id": p["id"], "type": p["type"], "pos": list(p["pos"]),
                 "color": p["color"], "move": p["move"], "rule": p["rule"]} for p in you]
 
