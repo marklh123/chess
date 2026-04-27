@@ -111,6 +111,15 @@ def rule_for_pawn(you,opponent,pawn):
     return new_pos
 
 def rule_for_rook(you, opponent,rook):
+    """
+        Find all possible moves for rook
+        :param you: your color, black or white
+        :param opponent: opponent color, black or white
+        :param rook: selected rook
+        :return: list of possible moves by the rook
+        """
+
+
     letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
     index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
