@@ -120,7 +120,7 @@ def rule_for_rook(you, opponent,rook):
     #
     your_color = you
     opponent_color = opponent
-    #
+
     new_pos = []
     directions = [(1,0), (-1,0), (0,1), (0,-1)]
 
