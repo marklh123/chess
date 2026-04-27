@@ -573,13 +573,13 @@ def is_your_king_in_check(you, opponent,
         # if king isn't in check next move it can go forward and update the board
         return False
 
-def is_opponent_king_in_check(you, opponent):
-    """
-    :param you:
-    :param opponent:
-    :return:
-    """
-    # checks if you put your opponent into check
+def is_opponent_in_check(you, opponent):
+    """ Detect if your move puts opponent in check
+        :param you: your color, black or white
+        :param opponent: opponent color, black or white
+        :return: if opponent is in check, True or False
+        """
+
     opponent_king = [piece for piece in opponent if piece["type"] == "king"][0]
     king_row = opponent_king["pos"][0]
     king_col = letter_index[opponent_king["pos"][1]]
