@@ -539,7 +539,7 @@ def all_new_moves_opponent_for_check(player, other):
     """
 
     all_new_moves_your_color = []
-    for i in player: # player = white or black
+    for i in player:
         my_rule = i["rule"]
         if i['type'] == 'pawn':
             my_rule = rule_for_pawn_takes
