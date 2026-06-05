@@ -31,7 +31,7 @@ white_pawn = pygame.transform.scale(white_pawn, (50, 50))
 window_size = pygame.display.set_mode((800,900))
 
 # board background image
-board_surface = pygame.image.load("/Users/markh/Downloads/board.png")
+board_surface = pygame.image.load("./assets/images/board.png")
 board_surface = pygame.transform.scale(board_surface, (800, 800))
 
 # where text will be under board

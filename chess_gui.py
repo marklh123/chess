@@ -2,18 +2,18 @@ import pygame
 from sys import exit
 
 from chess_backend import white, black, letter_index, index_letter, log_move, Castling, \
-    is_opponent_king_in_check, is_checkmate_opponent, is_your_king_in_check, PawnPromotion, Takes, \
-    all_new_moves_opponent_for_check
+    is_opponent_in_check, is_opponents_next_moves_0, is_your_king_in_check, PawnPromotion, Takes
 import constants
 from constants import pos_to_pixel
 
 
 def get_pixels(pos):
     """
-    Some comment and some more
-    :param pos:
-    :return:
+    Convert a digit position into a pixel position
+    :param pos: [row, col] board position as a tuple of digits
+    :return: pixel position
     """
+
     row_pixel = constants.pos_to_pixel[pos[0]]
     col_pixel = constants.pos_to_pixel[pos[1]]
 
@@ -25,8 +25,8 @@ def pixel_to_board(x_pixel, y_pixel):
     if y_pixel is None:
         return None, None
 
-    col = x_pixel // constants.square_size  # 0–7 (pixel # / 100) rounded down = horizontal pos of square
-    row = y_pixel // constants.square_size  # 0–7 (pixel # / 100) rounded down = vertical pos of square
+    col = x_pixel // constants.square_size
+    row = y_pixel // constants.square_size
 
     col_letter = index_letter.get(col)
     return row, col_letter
@@ -56,34 +56,32 @@ while constants.is_running:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            print(f"Saving {len(log_records)} records")
+            # saves game record
             log_move(log_records)
             pygame.quit()
             exit()
         if event.type == pygame.MOUSEBUTTONDOWN and not checkmate and not stalemate:
-
             x, y = event.pos
             if y > 800:
                 y = None
             clicked_row, clicked_col = pixel_to_board(x, y)  # turns pixel pos into number letter pos
 
             if selected_piece is None:
-                # --- FIRST CLICK: select a piece ---
+                # First click: select a piece
 
                 pieces = white if active_player_index == 0 else black
 
                 for p in pieces:
                     if p["pos"] == [clicked_row, clicked_col]:
                         selected_piece = p
+
                         # get valid moves for this piece
                         available_moves = p["rule"](you, opp, p)
 
                         clicked_row_one, clicked_col_one = clicked_row, clicked_col
-                        print(f"FIRST CLICK: {clicked_row_one, clicked_col_one}")
-
                         break
             else:
-                # --- SECOND CLICK: move if valid ---
+                # Second click: move if valid
 
                 target = [clicked_row, letter_index[clicked_col]]
                 you = white if active_player_index == 0 else black
@@ -123,11 +121,11 @@ while constants.is_running:
 
                         result = Castling(
                             black, white, letter_index, index_letter,
-                            king_row,  # xx — king's current row
-                            king_col,  # col — king's current col letter
-                            clicked_col_two,  # new_col — destination col letter
-                            clicked_row_two,  # new_row — destination row
-                            you  # your_color
+                            king_row,  # king's current row
+                            king_col,  # king's current col letter
+                            clicked_col_two,  # destination col letter
+                            clicked_row_two,  # destination row
+                            you  # your color
                         )
 
                         if result == "not_castling":
@@ -143,20 +141,21 @@ while constants.is_running:
                     # pawn promotion
                     PawnPromotion(selected_piece, clicked_row, clicked_col)
 
+                    # check and checkmate
                     white_in_check = False
                     black_in_check = False
-                    check_ = is_opponent_king_in_check(you, opp)
+                    check_ = is_opponent_in_check(you, opp)
                     if check_:
                         if opp == white:
                             white_in_check = True
                         elif opp == black:
                             black_in_check = True
 
-                        checkmate = is_checkmate_opponent(you, opp)
+                        checkmate = is_opponents_next_moves_0(you, opp)
 
                     #stalemate
                     if not check_:
-                        stalemate = is_checkmate_opponent(you, opp)
+                        stalemate = is_opponents_next_moves_0(you, opp)
 
                     # switch turns
                     active_player_index = (active_player_index + 1) % 2
@@ -186,7 +185,7 @@ while constants.is_running:
         square_col = constants.pos_to_pixel[letter_index[clicked_col]]
 
         cancel_move = pygame.Surface((constants.square_size, constants.square_size), pygame.SRCALPHA)
-        cancel_move.fill((255, 0, 0, 100))  # red semi transparent
+        cancel_move.fill((255, 0, 0, 100))  # semi-transparent red
 
         screen.blit(cancel_move, (square_col - 25, square_row - 25))
 
@@ -215,7 +214,7 @@ while constants.is_running:
                 check_king_surface.fill((0,0,255,100))
                 screen.blit(check_king_surface, (king_pos_in_pixels[0]-25,king_pos_in_pixels[1]-25))
 
-    #check text
+    # text
     if stalemate:
         turn_text = constants.font_turn.render(f"Game over! Tie by stalemate!", True, "Black")
     elif checkmate:
