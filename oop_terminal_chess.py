@@ -1,6 +1,6 @@
 import copy
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
-index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
+
 
 class Board:
     def __init__(self,pieces_white,pieces_black):
@@ -27,6 +27,9 @@ class Board:
             for x,y in enumerate(reversed(self.board_data)):
                 print((x+1)," ","   ".join(y)," ",(x+1))
         print("    a   b   c   d   e   f   g   h")
+
+    def change_turns(self):
+        self.active_player_index = (self.active_player_index + 1) % 2
 class Piece():
     def __init__(self,color,type,pos,moves,id,symbol,):
         self.color = color
@@ -59,7 +62,6 @@ class Pawn(Piece):
 
             if (([op_row, op_col] == [row + direction, col + 1]) or
                 ([op_row, op_col] == [row + direction, col - 1])):
-                print(f'take: {[op_row, op_col]}')
                 takes.append([op_row, op_col])
 
         return takes
@@ -92,12 +94,10 @@ class Pawn(Piece):
 
         #new_pos[0] is if a piece is right in front of the pawn in which the pawn has zero possible moves
         if [row, col] == new_pos[0]:
-            print(f"first {piece['pos']} is taken, remove forward moves")
             new_pos = []
         
         #this is when a piece is 2 places in front of a pawn, gets rid of the 2 space move option
         if (len(new_pos)>1) and ([row, col] == new_pos[1]):
-            print (f'this {piece["pos"]} is taken')
             new_pos.remove([row, col])
 
         #takes
@@ -277,7 +277,6 @@ class King(Piece):
         if self.moves == 0:
             # occupied_cols are all pieces cols that are in the same row as king
             occupied_cols = [p.pos[1] for p in all_pieces if p.pos[0] == row and p.type != "king"]
-            print(occupied_cols)
 
             # King-side castling: f and g must be empty (col+1 and col+2)
             kingside_clear = (col + 1) not in occupied_cols and (col + 2) not in occupied_cols
@@ -286,11 +285,8 @@ class King(Piece):
                         col - 3) not in occupied_cols
 
             if kingside_clear:
-                print(kingside_clear)
-                print("W1")
                 new_moves.append((0, 2))
             if queenside_clear:
-                print("W2")
                 new_moves.append((0, -2))
 
         new_pos = []
@@ -329,10 +325,9 @@ def validate_move(attempted_move):
     elif attempted_move[0] not in ["a","b","c","d","e","f","g","h"]:
         return "bad"
         
-    elif attempted_move[1] not in ["0","1","2","3","4","5","6","7"]:
+    elif attempted_move[1] not in ["1","2","3","4","5","6","7","8"]:
         return "bad"
     
-
 def main():
 
     p1w = Pawn(id="p1w",type="pawn",symbol="♙",pos=[6, 0],moves=0,color="white")
@@ -361,7 +356,7 @@ def main():
     p7b = Pawn(id="p7b",type="pawn",symbol="♟",pos=[1, 6],moves=0,color="black")
     p8b = Pawn(id="p8b",type="pawn",symbol="♟",pos=[1, 7],moves=0,color="black")
     r1b = Rook(id="r1b",type="rook",symbol="♜",pos=[0, 0],moves=0,color="black")
-    r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 6],moves=0,color="black")
+    r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 7],moves=0,color="black")
     k1b = Knight(id="k1b",type="knight",symbol="♞",pos=[0, 1],moves=0,color="black")
     k2b = Knight(id="k2b",type="knight",symbol="♞",pos=[0, 6],moves=0,color="black")
     b1b = Bishop(id="b1b",type="bishop",symbol="♝",pos=[0, 2],moves=0,color="black")
@@ -373,7 +368,7 @@ def main():
     pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,k1b,k2b,b1b,b2b,qb,kingb]
 
     board = Board(pieces_white,pieces_black)
-
+    
     print("\nHello guys welcome to chess! \n")
 
     player1 = input("White players name: ")
@@ -403,14 +398,13 @@ def main():
             piece_class = piece_class[0]
 
             result = make_a_move(piece_avialbe_moves,pieces_white,pieces_black, piece_class=piece_class)
-            print(result)
             if not result:
-                board.active_player_index = (board.active_player_index + 1) % 2 # keep same players turn
+                board.change_turns()
                 make_a_move(piece_avialbe_moves,pieces_white,pieces_black, piece_class=piece_class)
+            if result == "checkmate":
+                break
                 
-            
-
-        board.active_player_index = (board.active_player_index + 1) % 2
+        board.change_turns()
 
 def find_piece(you,pieces_white,pieces_black,piece_pos):
     # check if the selected cord has one of your pieces on it
@@ -423,9 +417,7 @@ def find_piece(you,pieces_white,pieces_black,piece_pos):
     
     for x in your_dict:
         if piece_pos == x.pos:
-            print(x.pos)
             piece_aviable_moves = x.rule(pieces_white,pieces_black)
-            print("Avaible_pos = ", piece_aviable_moves)
             return piece_aviable_moves
     return "Not a piece"
 
@@ -523,12 +515,8 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
     
     #update you_sim with new move
     you_sim = copy.deepcopy(you)
-    print("you sim: ", [x.pos for x in you_sim])
     moved_piece = [x for x in you_sim if x.id == piece.id][0] # gets object of piece that's moving
     moved_piece.pos = [new_row, new_col]
-    print("move: ", new_row, " ", new_col)
-    print("you sim2: ", [x.pos for x in you_sim])
-
 
     #if new move is take, remove the captured piece from opponent
     opponent_sim = copy.deepcopy(opponent)
@@ -547,13 +535,13 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
 
     if you == pieces_white:
         if king_pos in all_new_moves_opponent_for_check(player=opponent_sim, pieces_white=you_sim, pieces_black=opponent_sim):
-            print("You cant go here because its a check. Try another move. 111")
+            print("You cant go here because its a check. Try another move. (1)")
             return True
         else:
             return False
     elif you == pieces_black:
         if king_pos in all_new_moves_opponent_for_check(player=opponent_sim, pieces_white=opponent_sim, pieces_black=you_sim):
-            print("You cant go here because its a check. Try another move. 222")
+            print("You cant go here because its a check. Try another move. (2)")
             return True
         else:
         # if king isn't in check next move it can go forward and update the board
@@ -570,7 +558,7 @@ def is_opponent_king_in_check(you, opponent, pieces_white, pieces_black):
     king_pos = [king_row, king_col]
 
     if king_pos in all_new_moves_opponent_for_check(player=you, pieces_white=pieces_white, pieces_black=pieces_black):
-        print("You cant go here because its a check. Try another move.333")
+        print("You cant go here because its a check. Try another move. (3)")
         return True
     else:
         return False
@@ -587,8 +575,6 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
                 'id': a.id,
             })
     
-    print("OP NEXT M P: ", opponent_next_moves_passive)
-
     # for each move make a board simulation updating sim_opponenent with theroetical move
     list_of_trues = []
     for a in opponent_next_moves_passive:  
@@ -615,33 +601,22 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
 
         for k in sim_opponent:
             if k.type == "king":
-                print("Got here")
                 king_row = k.pos[0] 
                 king_col = k.pos[1]
 
                 if you == white_pieces:
-                    print("KING POS", king_row,king_col)
-                    print("ALL NEW MOVES: ", all_new_moves_opponent_for_check(player=sim_you, pieces_white=sim_you, pieces_black=sim_opponent))
-
                     if [king_row, king_col] in all_new_moves_opponent_for_check(player=sim_you, pieces_white=sim_you, pieces_black=sim_opponent):
-                        
-                        print("true")
                         list_of_trues.append(True)
                         break
                 
                 elif you == black_pieces:
-                    print("Yaay")
-
                     if [king_row, king_col] in all_new_moves_opponent_for_check(player=sim_opponent, pieces_white=sim_opponent, pieces_black=sim_you):
-                        print("true blakc")
                         list_of_trues.append(True)
                         break
     
     if len(list_of_trues) == len(opponent_next_moves_passive) and len(opponent_next_moves_passive) > 0:
         print("Checkmate, opponent")
         return True
-    
-    print("Nah:", len(list_of_trues)," ",len(opponent_next_moves_passive) )
     return False
 
 def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
@@ -669,9 +644,6 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
             continue
 
         col, row = int(letter_index[attempted_move_2[0]]) , 8 - int(attempted_move_2[1]) 
-
-        print("COL AND ROW = ", col," ", row)
-        print("AVIABLE MOVES: ",piece_aviable_moves)
     
         if [row,col] in piece_aviable_moves:
             while True:
@@ -683,8 +655,6 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                         if check_:
                             print("This is an illegal move as it walks into check, try again.")
                             return False
-                        else:
-                            print("not check...")
 
                         if ((x.type != 'king') or (x.type == 'king' and x.moves > 0)):
                             x.pos = [row,col]
@@ -714,18 +684,16 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
 
                         check_ = is_opponent_king_in_check(you=you, opponent=opponent,pieces_white=pieces_white,pieces_black=pieces_black)
                         if check_:
-                            print(f"Yeah ur cooked other color its a check")
+                            print(f"Check!")
 
                         checkmate = is_checkmate_opponent(you=you, opponent=opponent,white_pieces=pieces_white,black_pieces=pieces_black)
                         if checkmate:
-                            print("checkmate")
+                            print("Checkmate!")
                             return "checkmate"
-                        else:
-                            print("No checkmate you are okay!")
 
                         return True
         else:
-            print("Not good")
+            print("Piece can't move there, try again.")
 
 
 if __name__ == "__main__":
