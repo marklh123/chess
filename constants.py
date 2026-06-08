@@ -35,7 +35,7 @@ board_surface = pygame.image.load("./assets/images/board.png")
 board_surface = pygame.transform.scale(board_surface, (800, 800))
 
 # where text will be under board
-surface_turn_background = pygame.Surface((900,100)) # width and height
+surface_turn_background = pygame.Surface((800,100)) # width and height
 surface_turn_background.fill('White')
 font_turn = pygame.font.Font(None, 50) # font type, font size
 

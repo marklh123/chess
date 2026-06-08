@@ -1,7 +1,6 @@
 import copy
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
-
 class Board:
     def __init__(self,pieces_white,pieces_black):
         self.board_data = [["_" for _ in range(8)] for _ in range(8)]
@@ -69,10 +68,10 @@ class Pawn(Piece):
 
         row, col = self.pos
 
-        if self.color == "black":
-            direction = 1
-        else:
+        if self.color == "white":
             direction = -1
+        else:
+            direction = 1
 
         if self.moves == 0:
             new_moves = [(0, direction) , (0, direction*2)]
@@ -92,13 +91,13 @@ class Pawn(Piece):
             if len(new_pos) == 0:
                 break
 
-        #new_pos[0] is if a piece is right in front of the pawn in which the pawn has zero possible moves
-        if [row, col] == new_pos[0]:
-            new_pos = []
-        
-        #this is when a piece is 2 places in front of a pawn, gets rid of the 2 space move option
-        if (len(new_pos)>1) and ([row, col] == new_pos[1]):
-            new_pos.remove([row, col])
+            #new_pos[0] is if a piece is right in front of the pawn in which the pawn has zero possible moves
+            if [row, col] == new_pos[0]:
+                new_pos = []
+            
+            #this is when a piece is 2 places in front of a pawn, gets rid of the 2 space move option
+            if (len(new_pos)>1) and ([row, col] == new_pos[1]):
+                new_pos.remove([row, col])
 
         #takes
         takes = self.rule_pawn_takes(pieces_white,pieces_black)
@@ -274,29 +273,40 @@ class King(Piece):
 
         new_moves = [(1,0),(0,1),(-1,0),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]
 
+        your_color = pieces_white if self.color == "white" else pieces_black
+
         if self.moves == 0:
             # occupied_cols are all pieces cols that are in the same row as king
             occupied_cols = [p.pos[1] for p in all_pieces if p.pos[0] == row and p.type != "king"]
-
             # King-side castling: f and g must be empty (col+1 and col+2)
             kingside_clear = (col + 1) not in occupied_cols and (col + 2) not in occupied_cols
             # Queen-side castling: b, c and d must be empty (col-1, col-2, col-3)
             queenside_clear = (col - 1) not in occupied_cols and (col - 2) not in occupied_cols and (
                         col - 3) not in occupied_cols
 
-            if kingside_clear:
+            kingside_rook = False
+            queenside_rook = False
+
+            for p in your_color:
+                if p.type == "rook" and p.moves == 0 and p.pos[1] == col+3:
+                    kingside_rook = True
+                elif p.type == "rook" and p.moves == 0 and p.pos[1] == col-4:
+                    queenside_rook = True
+
+       
+            if kingside_clear and kingside_rook:
                 new_moves.append((0, 2))
-            if queenside_clear:
+            if queenside_clear and queenside_rook:
                 new_moves.append((0, -2))
 
         new_pos = []
 
         if self.color == 'white':
-            your_color = all_pieces[:16]
-            opponent_color = all_pieces[16:]
+            your_color = pieces_white
+            opponent_color = pieces_black
         else:
-            your_color =  all_pieces[16:]
-            opponent_color = all_pieces[:16]
+            your_color =  pieces_black
+            opponent_color = pieces_white
         
 
         for move in new_moves:
@@ -327,45 +337,45 @@ def validate_move(attempted_move):
         
     elif attempted_move[1] not in ["1","2","3","4","5","6","7","8"]:
         return "bad"
-    
+
+p1w = Pawn(id="p1w",type="pawn",symbol="♙",pos=[2, 2],moves=0,color="white")
+# p2w = Pawn(id="p2w",type="pawn",symbol="♙",pos=[6, 1],moves=0,color="white")
+# p3w = Pawn(id="p3w",type="pawn",symbol="♙",pos=[6, 2],moves=0,color="white")
+# p4w = Pawn(id="p4w",type="pawn",symbol="♙",pos=[6, 3],moves=0,color="white")
+# p5w = Pawn(id="p5w",type="pawn",symbol="♙",pos=[6, 4],moves=0,color="white")
+# p6w = Pawn(id="p6w",type="pawn",symbol="♙",pos=[6, 5],moves=0,color="white")
+# p7w = Pawn(id="p7w",type="pawn",symbol="♙",pos=[6, 6],moves=0,color="white")
+# p8w = Pawn(id="p8w",type="pawn",symbol="♙",pos=[6, 7],moves=0,color="white")
+r1w = Rook(id="r1w",type="rook",symbol="♖",pos=[7, 2],moves=0,color="white")
+r2w = Rook(id="r2w",type="rook",symbol="♖",pos=[1, 7],moves=0,color="white")
+# k1w = Knight(id="k1w",type="knight",symbol="♘",pos=[7, 1],moves=0,color="white")
+# k2w = Knight(id="k2w",type="knight",symbol="♘",pos=[7, 6],moves=0,color="white")
+# b1w = Bishop(id="b1w",type="bishop",symbol="♗",pos=[7, 2],moves=0,color="white")
+# b2w = Bishop(id="b2w",type="bishop",symbol="♗",pos=[7, 5],moves=0,color="white")
+qw = Queen(id="qw",type="queen",symbol="♕",pos=[1, 0],moves=0,color="white")
+kingw = King(id="kingw",type="king",symbol="♔",pos=[3, 6],moves=0,color="white")
+
+# p1b = Pawn(id="p1b",type="pawn",symbol="♟",pos=[1, 0],moves=0,color="black")
+# p2b = Pawn(id="p2b",type="pawn",symbol="♟",pos=[1, 1],moves=0,color="black")
+# p3b = Pawn(id="p3b",type="pawn",symbol="♟",pos=[1, 2],moves=0,color="black")
+# p4b = Pawn(id="p4b",type="pawn",symbol="♟",pos=[1, 3],moves=0,color="black")
+# p5b = Pawn(id="p5b",type="pawn",symbol="♟",pos=[1, 4],moves=0,color="black")
+# p6b = Pawn(id="p6b",type="pawn",symbol="♟",pos=[1, 5],moves=0,color="black")
+# p7b = Pawn(id="p7b",type="pawn",symbol="♟",pos=[1, 6],moves=0,color="black")
+# p8b = Pawn(id="p8b",type="pawn",symbol="♟",pos=[1, 7],moves=0,color="black")
+# r1b = Rook(id="r1b",type="rook",symbol="♜",pos=[0, 0],moves=0,color="black")
+# r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 7],moves=0,color="black")
+# k1b = Knight(id="k1b",type="knight",symbol="♞",pos=[0, 1],moves=0,color="black")
+# k2b = Knight(id="k2b",type="knight",symbol="♞",pos=[0, 6],moves=0,color="black")
+# b1b = Bishop(id="b1b",type="bishop",symbol="♝",pos=[0, 2],moves=0,color="black")
+# b2b = Bishop(id="b2b",type="bishop",symbol="♝",pos=[0, 5],moves=0,color="black")
+# qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black")
+kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 2],moves=0,color="black")
+
+pieces_white = [p1w,kingw,r1w,r2w,qw]
+pieces_black = [kingb]
+
 def main():
-
-    p1w = Pawn(id="p1w",type="pawn",symbol="♙",pos=[6, 0],moves=0,color="white")
-    p2w = Pawn(id="p2w",type="pawn",symbol="♙",pos=[6, 1],moves=0,color="white")
-    p3w = Pawn(id="p3w",type="pawn",symbol="♙",pos=[6, 2],moves=0,color="white")
-    p4w = Pawn(id="p4w",type="pawn",symbol="♙",pos=[6, 3],moves=0,color="white")
-    p5w = Pawn(id="p5w",type="pawn",symbol="♙",pos=[6, 4],moves=0,color="white")
-    p6w = Pawn(id="p6w",type="pawn",symbol="♙",pos=[6, 5],moves=0,color="white")
-    p7w = Pawn(id="p7w",type="pawn",symbol="♙",pos=[6, 6],moves=0,color="white")
-    p8w = Pawn(id="p8w",type="pawn",symbol="♙",pos=[6, 7],moves=0,color="white")
-    r1w = Rook(id="r1w",type="rook",symbol="♖",pos=[7, 0],moves=0,color="white")
-    r2w = Rook(id="r2w",type="rook",symbol="♖",pos=[7, 7],moves=0,color="white")
-    k1w = Knight(id="k1w",type="knight",symbol="♘",pos=[7, 1],moves=0,color="white")
-    k2w = Knight(id="k2w",type="knight",symbol="♘",pos=[7, 6],moves=0,color="white")
-    b1w = Bishop(id="b1w",type="bishop",symbol="♗",pos=[7, 2],moves=0,color="white")
-    b2w = Bishop(id="b2w",type="bishop",symbol="♗",pos=[7, 5],moves=0,color="white")
-    qw = Queen(id="qw",type="queen",symbol="♕",pos=[7, 3],moves=0,color="white")
-    kingw = King(id="kingw",type="king",symbol="♔",pos=[7, 4],moves=0,color="white")
-
-    p1b = Pawn(id="p1b",type="pawn",symbol="♟",pos=[1, 0],moves=0,color="black")
-    p2b = Pawn(id="p2b",type="pawn",symbol="♟",pos=[1, 1],moves=0,color="black")
-    p3b = Pawn(id="p3b",type="pawn",symbol="♟",pos=[1, 2],moves=0,color="black")
-    p4b = Pawn(id="p4b",type="pawn",symbol="♟",pos=[1, 3],moves=0,color="black")
-    p5b = Pawn(id="p5b",type="pawn",symbol="♟",pos=[1, 4],moves=0,color="black")
-    p6b = Pawn(id="p6b",type="pawn",symbol="♟",pos=[1, 5],moves=0,color="black")
-    p7b = Pawn(id="p7b",type="pawn",symbol="♟",pos=[1, 6],moves=0,color="black")
-    p8b = Pawn(id="p8b",type="pawn",symbol="♟",pos=[1, 7],moves=0,color="black")
-    r1b = Rook(id="r1b",type="rook",symbol="♜",pos=[0, 0],moves=0,color="black")
-    r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 7],moves=0,color="black")
-    k1b = Knight(id="k1b",type="knight",symbol="♞",pos=[0, 1],moves=0,color="black")
-    k2b = Knight(id="k2b",type="knight",symbol="♞",pos=[0, 6],moves=0,color="black")
-    b1b = Bishop(id="b1b",type="bishop",symbol="♝",pos=[0, 2],moves=0,color="black")
-    b2b = Bishop(id="b2b",type="bishop",symbol="♝",pos=[0, 5],moves=0,color="black")
-    qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black")
-    kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 4],moves=0,color="black")
-    
-    pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,k1w,k2w,b1w,b2w,qw,kingw]
-    pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,k1b,k2b,b1b,b2b,qb,kingb]
 
     board = Board(pieces_white,pieces_black)
     
@@ -398,14 +408,12 @@ def main():
             piece_class = piece_class[0]
 
             result = make_a_move(piece_avialbe_moves,pieces_white,pieces_black, piece_class=piece_class)
-            if not result:
-                board.change_turns()
-                make_a_move(piece_avialbe_moves,pieces_white,pieces_black, piece_class=piece_class)
-            if result == "checkmate":
+   
+            if result == "checkmate" or result == "stalemate":
                 break
+            elif result:
+                board.change_turns()
                 
-        board.change_turns()
-
 def find_piece(you,pieces_white,pieces_black,piece_pos):
     # check if the selected cord has one of your pieces on it
 
@@ -413,7 +421,6 @@ def find_piece(you,pieces_white,pieces_black,piece_pos):
         your_dict = pieces_white
     else:
         your_dict = pieces_black
-    
     
     for x in your_dict:
         if piece_pos == x.pos:
@@ -507,16 +514,38 @@ def all_new_moves_opponent_for_check(player, pieces_white, pieces_black):
 
     all_new_moves_your_color = []
     for i in player: # player = white or black
-        all_new_moves_your_color.extend(i.rule(pieces_white,pieces_black))
+        if i.type == "pawn":
+            all_new_moves_your_color.extend(i.rule_pawn_takes(pieces_white,pieces_black))
+        else:
+            all_new_moves_your_color.extend(i.rule(pieces_white,pieces_black))
 
     return all_new_moves_your_color
 
+def castling_check(new_col, original_col, new_row, you_sim):
+    if new_col > original_col:
+            rook_from = [new_row, original_col + 3]
+            rook_to   = [new_row, original_col + 1]
+    else:
+            rook_from = [new_row, original_col - 4]
+            rook_to   = [new_row, original_col - 1]
+    for p in you_sim:
+            if p.pos == rook_from and p.type == "rook":
+                p.pos = rook_to
+                break
+
 def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, pieces_black):
-    
+
     #update you_sim with new move
     you_sim = copy.deepcopy(you)
     moved_piece = [x for x in you_sim if x.id == piece.id][0] # gets object of piece that's moving
     moved_piece.pos = [new_row, new_col]
+
+    original_col = piece.pos[1]  
+    king_moved_two = piece.type == "king" and abs(new_col - original_col) == 2
+
+    # castling detection, update rook pos before making copies if king castled
+    if king_moved_two:
+        castling_check(new_col=new_col,original_col=original_col,new_row=new_row,you_sim=you_sim)
 
     #if new move is take, remove the captured piece from opponent
     opponent_sim = copy.deepcopy(opponent)
@@ -547,8 +576,6 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
         # if king isn't in check next move it can go forward and update the board
             return False
     
-    
-
 def is_opponent_king_in_check(you, opponent, pieces_white, pieces_black):
     
     # checks if you put your opponent into check
@@ -565,6 +592,8 @@ def is_opponent_king_in_check(you, opponent, pieces_white, pieces_black):
 
 def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
     
+    kings_original_row, kings_original_col = next(a.pos for a in opponent if a.type == "king")
+
     # makes list of opponenets possible next moves
     opponent_next_moves_passive = []
     for a in opponent:
@@ -575,14 +604,24 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
                 'id': a.id,
             })
     
+    
     # for each move make a board simulation updating sim_opponenent with theroetical move
     list_of_trues = []
     for a in opponent_next_moves_passive:  
+        
         sim_you = copy.deepcopy(you)
         sim_opponent = copy.deepcopy(opponent)
 
         sim_row = a["pos"][0]
         sim_col = a["pos"][1]
+
+        if "king" in a["id"]:
+            
+            king_moved_two = abs(sim_col - kings_original_col) == 2 and sim_row == kings_original_row
+
+            if king_moved_two:
+                castling_check(new_col=sim_col,original_col=kings_original_col,new_row=sim_row,you_sim=sim_opponent)
+
 
         # every other key but pos stays the same, pos is updated
         for x in sim_opponent:
@@ -615,7 +654,6 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
                         break
     
     if len(list_of_trues) == len(opponent_next_moves_passive) and len(opponent_next_moves_passive) > 0:
-        print("Checkmate, opponent")
         return True
     return False
 
@@ -647,7 +685,6 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
     
         if [row,col] in piece_aviable_moves:
             while True:
-
                 for x in all_pieces:
                     if x.id == piece_class.id:
 
@@ -686,15 +723,19 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                         if check_:
                             print(f"Check!")
 
-                        checkmate = is_checkmate_opponent(you=you, opponent=opponent,white_pieces=pieces_white,black_pieces=pieces_black)
-                        if checkmate:
-                            print("Checkmate!")
-                            return "checkmate"
+                            checkmate = is_checkmate_opponent(you=you, opponent=opponent,white_pieces=pieces_white,black_pieces=pieces_black)
+                            if checkmate:
+                                print("Checkmate!")
+                                return "checkmate"
+                        else:
+                            stalemate = is_checkmate_opponent(you=you, opponent=opponent,white_pieces=pieces_white,black_pieces=pieces_black)
+                            if stalemate:
+                                print("Stalemate!")
+                                return "stalemate"
 
                         return True
         else:
             print("Piece can't move there, try again.")
-
 
 if __name__ == "__main__":
     main()
