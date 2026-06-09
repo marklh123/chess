@@ -139,8 +139,6 @@ class Knight(Piece):
 
             new_pos.append([temp_row, temp_col])
 
-        # continue → SKIP this iteration, keep looping
-
         return new_pos
 class Bishop(Piece):
     def __init__(self, color, type, pos, moves, id,symbol):
@@ -339,37 +337,37 @@ def validate_move(attempted_move):
         return "bad"
 
 p1w = Pawn(id="p1w",type="pawn",symbol="♙",pos=[2, 2],moves=0,color="white")
-# p2w = Pawn(id="p2w",type="pawn",symbol="♙",pos=[6, 1],moves=0,color="white")
-# p3w = Pawn(id="p3w",type="pawn",symbol="♙",pos=[6, 2],moves=0,color="white")
-# p4w = Pawn(id="p4w",type="pawn",symbol="♙",pos=[6, 3],moves=0,color="white")
-# p5w = Pawn(id="p5w",type="pawn",symbol="♙",pos=[6, 4],moves=0,color="white")
-# p6w = Pawn(id="p6w",type="pawn",symbol="♙",pos=[6, 5],moves=0,color="white")
-# p7w = Pawn(id="p7w",type="pawn",symbol="♙",pos=[6, 6],moves=0,color="white")
-# p8w = Pawn(id="p8w",type="pawn",symbol="♙",pos=[6, 7],moves=0,color="white")
+p2w = Pawn(id="p2w",type="pawn",symbol="♙",pos=[6, 1],moves=0,color="white")
+p3w = Pawn(id="p3w",type="pawn",symbol="♙",pos=[6, 2],moves=0,color="white")
+p4w = Pawn(id="p4w",type="pawn",symbol="♙",pos=[6, 3],moves=0,color="white")
+p5w = Pawn(id="p5w",type="pawn",symbol="♙",pos=[6, 4],moves=0,color="white")
+p6w = Pawn(id="p6w",type="pawn",symbol="♙",pos=[6, 5],moves=0,color="white")
+p7w = Pawn(id="p7w",type="pawn",symbol="♙",pos=[6, 6],moves=0,color="white")
+p8w = Pawn(id="p8w",type="pawn",symbol="♙",pos=[6, 7],moves=0,color="white")
 r1w = Rook(id="r1w",type="rook",symbol="♖",pos=[7, 2],moves=0,color="white")
 r2w = Rook(id="r2w",type="rook",symbol="♖",pos=[1, 7],moves=0,color="white")
-# k1w = Knight(id="k1w",type="knight",symbol="♘",pos=[7, 1],moves=0,color="white")
-# k2w = Knight(id="k2w",type="knight",symbol="♘",pos=[7, 6],moves=0,color="white")
-# b1w = Bishop(id="b1w",type="bishop",symbol="♗",pos=[7, 2],moves=0,color="white")
-# b2w = Bishop(id="b2w",type="bishop",symbol="♗",pos=[7, 5],moves=0,color="white")
+k1w = Knight(id="k1w",type="knight",symbol="♘",pos=[7, 1],moves=0,color="white")
+k2w = Knight(id="k2w",type="knight",symbol="♘",pos=[7, 6],moves=0,color="white")
+b1w = Bishop(id="b1w",type="bishop",symbol="♗",pos=[7, 2],moves=0,color="white")
+b2w = Bishop(id="b2w",type="bishop",symbol="♗",pos=[7, 5],moves=0,color="white")
 qw = Queen(id="qw",type="queen",symbol="♕",pos=[1, 0],moves=0,color="white")
 kingw = King(id="kingw",type="king",symbol="♔",pos=[3, 6],moves=0,color="white")
 
-# p1b = Pawn(id="p1b",type="pawn",symbol="♟",pos=[1, 0],moves=0,color="black")
-# p2b = Pawn(id="p2b",type="pawn",symbol="♟",pos=[1, 1],moves=0,color="black")
-# p3b = Pawn(id="p3b",type="pawn",symbol="♟",pos=[1, 2],moves=0,color="black")
-# p4b = Pawn(id="p4b",type="pawn",symbol="♟",pos=[1, 3],moves=0,color="black")
-# p5b = Pawn(id="p5b",type="pawn",symbol="♟",pos=[1, 4],moves=0,color="black")
-# p6b = Pawn(id="p6b",type="pawn",symbol="♟",pos=[1, 5],moves=0,color="black")
-# p7b = Pawn(id="p7b",type="pawn",symbol="♟",pos=[1, 6],moves=0,color="black")
-# p8b = Pawn(id="p8b",type="pawn",symbol="♟",pos=[1, 7],moves=0,color="black")
-# r1b = Rook(id="r1b",type="rook",symbol="♜",pos=[0, 0],moves=0,color="black")
-# r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 7],moves=0,color="black")
-# k1b = Knight(id="k1b",type="knight",symbol="♞",pos=[0, 1],moves=0,color="black")
-# k2b = Knight(id="k2b",type="knight",symbol="♞",pos=[0, 6],moves=0,color="black")
-# b1b = Bishop(id="b1b",type="bishop",symbol="♝",pos=[0, 2],moves=0,color="black")
-# b2b = Bishop(id="b2b",type="bishop",symbol="♝",pos=[0, 5],moves=0,color="black")
-# qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black")
+p1b = Pawn(id="p1b",type="pawn",symbol="♟",pos=[1, 0],moves=0,color="black")
+p2b = Pawn(id="p2b",type="pawn",symbol="♟",pos=[1, 1],moves=0,color="black")
+p3b = Pawn(id="p3b",type="pawn",symbol="♟",pos=[1, 2],moves=0,color="black")
+p4b = Pawn(id="p4b",type="pawn",symbol="♟",pos=[1, 3],moves=0,color="black")
+p5b = Pawn(id="p5b",type="pawn",symbol="♟",pos=[1, 4],moves=0,color="black")
+p6b = Pawn(id="p6b",type="pawn",symbol="♟",pos=[1, 5],moves=0,color="black")
+p7b = Pawn(id="p7b",type="pawn",symbol="♟",pos=[1, 6],moves=0,color="black")
+p8b = Pawn(id="p8b",type="pawn",symbol="♟",pos=[1, 7],moves=0,color="black")
+r1b = Rook(id="r1b",type="rook",symbol="♜",pos=[0, 0],moves=0,color="black")
+r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 7],moves=0,color="black")
+k1b = Knight(id="k1b",type="knight",symbol="♞",pos=[0, 1],moves=0,color="black")
+k2b = Knight(id="k2b",type="knight",symbol="♞",pos=[0, 6],moves=0,color="black")
+b1b = Bishop(id="b1b",type="bishop",symbol="♝",pos=[0, 2],moves=0,color="black")
+b2b = Bishop(id="b2b",type="bishop",symbol="♝",pos=[0, 5],moves=0,color="black")
+qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black")
 kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 2],moves=0,color="black")
 
 pieces_white = [p1w,kingw,r1w,r2w,qw]

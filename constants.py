@@ -39,6 +39,10 @@ surface_turn_background = pygame.Surface((800,100)) # width and height
 surface_turn_background.fill('White')
 font_turn = pygame.font.Font(None, 50) # font type, font size
 
+# shows taken pieces section
+taken_pieces = pygame.Surface((200,900))
+taken_pieces.fill("Blue")
+
 pos_to_pixel = {0:25,1:125,2:225,3:325,4:425,5:525,6:625,7:725}
 pos_to_pixel_reversed = {0:725,1:625,2:525,3:425,4:325,5:225,6:125,7:25}
 
