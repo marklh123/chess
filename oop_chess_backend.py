@@ -39,6 +39,19 @@ class Piece():
         self.id = id
         self.symbol = symbol
         self.image = image
+   
+    def __getstate__(self):
+            # Defines exactly what data from a Python class should be saved (serialized) when exporting it to a file or stream or copy
+            state = self.__dict__.copy()
+            if 'image' in state:
+                del state['image']
+            return state
+
+    def __setstate__(self, state):
+        # Restore the state and give image a default value
+        self.__dict__.update(state)
+        self.image = None
+
 
 class Pawn(Piece):  
     def __init__(self, color, type, pos, moves, id, symbol,image):
@@ -437,7 +450,7 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
         if (row, col) in blackbackranks:
             x = your_pieces.index(piece)
             del your_pieces[x]
-            q2w = Queen(color="white",type="queen",moves=0,id="q2w",symbol="♕",pos=[row, col])
+            q2w = Queen(color="white",type="queen",moves=0,id="q2w",symbol="♕",pos=[row, col],image=constants.white_queen)
             your_pieces.append(q2w)
 
     elif piece.color == "black" and piece.type == "pawn":
