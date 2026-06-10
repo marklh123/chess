@@ -222,15 +222,18 @@ class App:
                     check_king_surface.fill((0,0,255,100))
                     self.screen.blit(check_king_surface, (king_pos_in_pixels[0]-25,king_pos_in_pixels[1]-25))
         
+        name = "white" if self.active_player_index == 0 else "black"
+
         # text
         if self.stalemate:
             turn_text = constants.font_turn.render(f"Game over! Tie by stalemate!", True, "Black")
         elif self.checkmate:
-            turn_text = constants.font_turn.render(f"Game over! (someone) wins by checkmate!", True, "Black")
+            turn_text = constants.font_turn.render(f"Game over! {name} wins by checkmate!", True, "Black")
         elif self.black_in_check or self.white_in_check:
-            turn_text = constants.font_turn.render(f"(someone)'s turn, you are in check!", True, "Black")
+            turn_text = constants.font_turn.render(f"{name}'s turn, you are in check!", True, "Black")
         else:
-            turn_text = constants.font_turn.render(f"It's (someone)'s turn.", True, "Black")
+            turn_text = constants.font_turn.render(f"It's {name}'s turn.", True, "Black")
+        self.screen.blit(turn_text, (10, 810))
 
         pygame.display.update()
 

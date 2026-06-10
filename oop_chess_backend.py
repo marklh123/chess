@@ -385,7 +385,7 @@ qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black",ima
 kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 4],moves=0,color="black",image=constants.black_king)
 
 pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,b1w,b2w,k1w,k2w,kingw,r1w,r2w,qw]
-pieces_black = [kingb]
+pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,b1b,b2b,k1b,k2b,r1b,r2b,qb,kingb]
 
 def main():
 
