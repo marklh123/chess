@@ -45,6 +45,10 @@ class App:
         self.stalemate = False
         self.available_moves = []
         self.log_records = []
+        self.taken_pieces_white = []
+        self.taken_pieces_black = []
+
+
 
     def set_player_and_opp(self):
         self.you = pieces_white if self.active_player_index == 0 else pieces_black
@@ -139,7 +143,7 @@ class App:
                         print("piece moved!")
                     
                     # remove any captured opponent piece
-                    Takes(pieces_white,pieces_black,self.selected_piece)
+                    Takes(pieces_white,pieces_black,self.selected_piece,self.taken_pieces_white,self.taken_pieces_black)
 
                     # pawn promotion
                     PawnPromotion(self.selected_piece, self.clicked_row, self.clicked_col, pieces_white, pieces_black)
@@ -221,10 +225,15 @@ class App:
                                                         pygame.SRCALPHA)
                     check_king_surface.fill((0,0,255,100))
                     self.screen.blit(check_king_surface, (king_pos_in_pixels[0]-25,king_pos_in_pixels[1]-25))
-        
-        name = "white" if self.active_player_index == 0 else "black"
 
+        # draw taken pieces
+        for x, piece in enumerate(self.taken_pieces_black):
+            self.screen.blit(piece.image, constants.spots_black[x])
+        for x, piece in enumerate(self.taken_pieces_white):
+            self.screen.blit(piece.image, constants.spots_white[x])
+        
         # text
+        name = "white" if self.active_player_index == 0 else "black"
         if self.stalemate:
             turn_text = constants.font_turn.render(f"Game over! Tie by stalemate!", True, "Black")
         elif self.checkmate:
@@ -233,6 +242,7 @@ class App:
             turn_text = constants.font_turn.render(f"{name}'s turn, you are in check!", True, "Black")
         else:
             turn_text = constants.font_turn.render(f"It's {name}'s turn.", True, "Black")
+        
         self.screen.blit(turn_text, (10, 810))
 
         pygame.display.update()

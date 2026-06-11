@@ -8,6 +8,8 @@ class Board:
         self.active_player_index = 0
         self.pieces_white = pieces_white
         self.pieces_black = pieces_black
+        self.taken_list_white = []
+        self.taken_list_black = []
 
     def board_print(self):
 
@@ -31,7 +33,7 @@ class Board:
     def change_turns(self):
         self.active_player_index = (self.active_player_index + 1) % 2
 class Piece():
-    def __init__(self,color,type,pos,moves,id,symbol,image):
+    def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         self.color = color
         self.type = type
         self.pos = pos
@@ -54,7 +56,7 @@ class Piece():
 
 
 class Pawn(Piece):  
-    def __init__(self, color, type, pos, moves, id, symbol,image):
+    def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol,image)
     def rule_pawn_takes(self,pieces_white,pieces_black):
         if self.color == "white":
@@ -118,7 +120,7 @@ class Pawn(Piece):
 
         return new_pos
 class Knight(Piece):
-    def __init__(self, color, type, pos, moves, id,symbol, image):
+    def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id,symbol, image)
     def rule(self,pieces_white,pieces_black):
         row, col = self.pos
@@ -155,7 +157,7 @@ class Knight(Piece):
 
         return new_pos
 class Bishop(Piece):
-    def __init__(self, color, type, pos, moves, id,symbol, image):
+    def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id,symbol, image)
     def rule(self,pieces_white,pieces_black):
 
@@ -195,7 +197,7 @@ class Bishop(Piece):
 
         return new_pos
 class Rook(Piece):
-    def __init__(self, color, type, pos, moves, id,symbol, image):
+    def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id,symbol, image)
     def rule(self,pieces_white,pieces_black):
         row, col = self.pos
@@ -236,7 +238,7 @@ class Rook(Piece):
 
         return new_pos
 class Queen(Piece):
-    def __init__(self, color, type, pos, moves, id, symbol, image):
+    def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol, image)
     
     def rule(self,pieces_white,pieces_black):
@@ -387,9 +389,9 @@ kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 4],moves=0,color="black
 pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,b1w,b2w,k1w,k2w,kingw,r1w,r2w,qw]
 pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,b1b,b2b,k1b,k2b,r1b,r2b,qb,kingb]
 
-def main():
+board = Board(pieces_white,pieces_black)
 
-    board = Board(pieces_white,pieces_black)
+def main():
     
     print("\nHello guys welcome to chess! \n")
 
@@ -460,12 +462,49 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
             q2b= Queen(color="black",type="queen",moves=0,id="q2b",symbol="♛",pos=[row, col])
             your_pieces.append(q2b)
 
-def Takes(pieces_white,pieces_black,piece):
+def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
     opponent_pieces = pieces_black if piece.color == "white" else pieces_white
 
     for x, op in enumerate(opponent_pieces):
         if op.pos == piece.pos:
             del opponent_pieces[x]
+
+            match op.type:
+                case "pawn":
+                    if op.color == "white":
+                        taken_piece = Pawn(image=constants.white_pawn_tiny) 
+                    else:
+                        taken_piece = Pawn(image=constants.black_pawn_tiny)
+                    
+                case "rook":
+                    if op.color == "white":
+                        taken_piece = Rook(image=constants.white_rook_tiny) 
+                    else:
+                        taken_piece = Rook(image=constants.black_rook_tiny)
+                
+                case "knight":
+                    if op.color == "white":
+                        taken_piece = Knight(image=constants.white_knight_tiny) 
+                    else:
+                        taken_piece = Knight(image=constants.black_knight_tiny)
+                
+                case "bishop":
+                    if op.color == "white":
+                        taken_piece = Bishop(image=constants.white_bishop_tiny) 
+                    else:
+                        taken_piece = Bishop(image=constants.black_bishop_tiny)
+                
+                case "queen":
+                    if op.color == "white":
+                        taken_piece = Queen(image=constants.white_queen_tiny) 
+                    else:
+                        taken_piece = Queen(image=constants.black_queen_tiny)
+
+            if op.color =="white":
+                take_list_white.append(taken_piece)
+            else:
+                take_list_black.append(taken_piece)
+
             break
 
 def Castling(black, white, xx, col, new_col, new_row, your_color):
@@ -686,8 +725,11 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
             print("this piece can't move")
             return False
 
-        print("Select square to move to (example a5)")
+        print("Select square to move to (example a5) type cancel to cancel move")
         attempted_move_2 = input()
+
+        if attempted_move_2 == "cancel":
+            return False
 
         if validate_move(attempted_move_2) == "bad":
             print("Invalid move, try again.")
@@ -727,8 +769,8 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                             elif result == "done castling":
                                 x.pos = [row,col]
                                 x.moves+=1
-
-                        Takes(pieces_white,pieces_black,x)
+                        
+                        Takes(pieces_white,pieces_black,x,board.taken_list_white,board.taken_list_white)
                         PawnPromotion(piece=x,row=row,col=col,pieces_white=pieces_white,pieces_black=pieces_black)
 
                         check_ = is_opponent_king_in_check(you=you, opponent=opponent,pieces_white=pieces_white,pieces_black=pieces_black)
