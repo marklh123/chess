@@ -2,6 +2,8 @@ import copy
 import constants
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
+#BUG: king cant take rooks 
+
 class Board:
     def __init__(self,pieces_white,pieces_black):
         self.board_data = [["_" for _ in range(8)] for _ in range(8)]
@@ -386,8 +388,8 @@ b2b = Bishop(id="b2b",type="bishop",symbol="♝",pos=[0, 5],moves=0,color="black
 qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black",image=constants.black_queen)
 kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 4],moves=0,color="black",image=constants.black_king)
 
-pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,b1w,b2w,k1w,k2w,kingw,r1w,r2w,qw]
-pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,b1b,b2b,k1b,k2b,r1b,r2b,qb,kingb]
+pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,b1w,b2w,k1w,k2w,kingw,qw]
+pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,b1b,b2b,k1b,k2b,qb,kingb]
 
 board = Board(pieces_white,pieces_black)
 
@@ -466,7 +468,13 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
     opponent_pieces = pieces_black if piece.color == "white" else pieces_white
 
     for x, op in enumerate(opponent_pieces):
+        
+        if op.type == "rook":
+            print("Rook Pos, ", op.pos)
+            print("king Pos: ", piece.pos)
+
         if op.pos == piece.pos:
+            print("YAYAYAYA")
             del opponent_pieces[x]
 
             match op.type:
@@ -500,12 +508,14 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
                     else:
                         taken_piece = Queen(image=constants.black_queen_tiny)
 
-            if op.color =="white":
+            if op.color == "white":
                 take_list_white.append(taken_piece)
             else:
                 take_list_black.append(taken_piece)
 
             break
+
+       
 
 def Castling(black, white, xx, col, new_col, new_row, your_color):
 

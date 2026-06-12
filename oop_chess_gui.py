@@ -69,15 +69,15 @@ class App:
             
             x,y = event.pos
             self.clicked_row, self.clicked_col = pixel_to_board(x, y)  
-            print("Clicked row and col: ", self.clicked_row, self.clicked_col)
+            # print("Clicked row and col: ", self.clicked_row, self.clicked_col)
 
             if self.selected_piece is None:
-                print("selected piece is none")
+                # print("selected piece is none")
                 # First click: select a piece
 
                 for p in self.you:
-                    print("p pos.color: ",p.color)
-                    print("ur color: ", [x.color for x in self.you],self.active_player_index)
+                    # print("p pos.color: ",p.color)
+                    # print("ur color: ", [x.color for x in self.you],self.active_player_index)
                     if p.pos == [self.clicked_row, self.clicked_col]:
                         self.selected_piece = p
 
@@ -140,7 +140,7 @@ class App:
                     if valid_move:
                         self.selected_piece.pos = [clicked_row_two, clicked_col_two]
                         self.selected_piece.moves += 1
-                        print("piece moved!")
+                        # print("piece moved!")
                     
                     # remove any captured opponent piece
                     Takes(pieces_white,pieces_black,self.selected_piece,self.taken_pieces_white,self.taken_pieces_black)
@@ -234,10 +234,12 @@ class App:
         
         # text
         name = "white" if self.active_player_index == 0 else "black"
+        name2 = "white" if self.active_player_index == 1 else "black"
+
         if self.stalemate:
             turn_text = constants.font_turn.render(f"Game over! Tie by stalemate!", True, "Black")
         elif self.checkmate:
-            turn_text = constants.font_turn.render(f"Game over! {name} wins by checkmate!", True, "Black")
+            turn_text = constants.font_turn.render(f"Game over! {name2} wins by checkmate!", True, "Black")
         elif self.black_in_check or self.white_in_check:
             turn_text = constants.font_turn.render(f"{name}'s turn, you are in check!", True, "Black")
         else:
