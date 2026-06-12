@@ -2,7 +2,7 @@ import copy
 import constants
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
-#BUG: king cant take rooks 
+#BUG: Some complex checkmates don't get detected
 
 class Board:
     def __init__(self,pieces_white,pieces_black):
