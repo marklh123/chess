@@ -83,7 +83,7 @@ class App:
 
                         # get valid moves for this piece
                         self.available_moves = p.rule(pieces_white, pieces_black)
-                        print("found a piece and its moves")
+                        # print("found a piece and its moves")
                         break
             else:
                 # Second click: move if valid

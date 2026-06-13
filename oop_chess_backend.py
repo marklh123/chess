@@ -4,6 +4,7 @@ letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
 #BUG: Some complex checkmates don't get detected
 # Like a checkmate where the piece that delivers checkmate is protected by another piece
+# defiently something to do with get all moves for check function
 
 class Board:
     def __init__(self,pieces_white,pieces_black):
@@ -469,13 +470,8 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
     opponent_pieces = pieces_black if piece.color == "white" else pieces_white
 
     for x, op in enumerate(opponent_pieces):
-        
-        if op.type == "rook":
-            print("Rook Pos, ", op.pos)
-            print("king Pos: ", piece.pos)
 
         if op.pos == piece.pos:
-            print("YAYAYAYA")
             del opponent_pieces[x]
 
             match op.type:
@@ -667,11 +663,10 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
                 'pos': [x[0], x[1]],
                 'id': a.id,
             })
-    
+
     # for each possible next move, make a board simulation
     # updating sim_opponenent with the theroetical move position
     list_of_trues = []
-    list_of_safe_moves = []
     for a in opponent_next_moves_passive:  
         
         sim_you = copy.deepcopy(you)
@@ -701,6 +696,7 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
         if captured_piece:
             sim_you.remove(captured_piece)
 
+
         # find the opponents king
         for k in sim_opponent:
             if k.type == "king":
@@ -712,15 +708,17 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
                     if [king_row, king_col] in all_new_moves_opponent_for_check(player=sim_you, pieces_white=sim_you, pieces_black=sim_opponent):
                         list_of_trues.append(True)
                         break
-
+                
                 elif you == black_pieces:
-                    if [king_row, king_col] in all_new_moves_opponent_for_check(player=sim_opponent, pieces_white=sim_opponent, pieces_black=sim_you):
+                    if [king_row, king_col] in all_new_moves_opponent_for_check(player=sim_you, pieces_white=sim_opponent, pieces_black=sim_you):
                         list_of_trues.append(True)
                         break
-    
+                    
     # if the lists length is equal to opponents possible next moves, its checkmate/stalemate, otherwise not
     if len(list_of_trues) == len(opponent_next_moves_passive) and len(opponent_next_moves_passive) > 0:
+        print("checkmate")
         return True
+    print("no checkmate detected")
     return False
 
 def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
@@ -737,17 +735,14 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
     while True:
 
         if len(piece_aviable_moves) == 0:
-            print("this piece can't move")
             return False
 
-        print("Select square to move to (example a5) type cancel to cancel move")
         attempted_move_2 = input()
 
         if attempted_move_2 == "cancel":
             return False
 
         if validate_move(attempted_move_2) == "bad":
-            print("Invalid move, try again.")
             continue
 
         col, row = int(letter_index[attempted_move_2[0]]) , 8 - int(attempted_move_2[1]) 
@@ -759,7 +754,6 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
 
                         check_ = is_your_king_in_check(you=you, opponent=opponent, piece=x, new_row=row, new_col=col, pieces_white=pieces_white,pieces_black=pieces_black)
                         if check_:
-                            print("This is an illegal move as it walks into check, try again.")
                             return False
 
                         if ((x.type != 'king') or (x.type == 'king' and x.moves > 0)):
@@ -779,7 +773,6 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                                 x.pos = [row,col]
                                 x.moves+=1
                             elif result == "cancel castling":
-                                print("This move is not castling done right, try again.")
                                 return False
                             elif result == "done castling":
                                 x.pos = [row,col]
