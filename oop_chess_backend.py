@@ -3,6 +3,7 @@ import constants
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
 #BUG: Some complex checkmates don't get detected
+# Like a checkmate where the piece that delivers checkmate is protected by another piece
 
 class Board:
     def __init__(self,pieces_white,pieces_black):
@@ -448,7 +449,7 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
     blackbackranks = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]
     whitebackranks = [(7, 0), (7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7)]
     
-    your_pieces = pieces_white if piece.color =="white" else pieces_black
+    your_pieces = pieces_white if piece.color == "white" else pieces_black
 
     if piece.color == "white" and piece.type == "pawn":
         if (row, col) in blackbackranks:
@@ -461,7 +462,7 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
         if (row, col) in whitebackranks:
             x = your_pieces.index(piece)
             del your_pieces[x]
-            q2b= Queen(color="black",type="queen",moves=0,id="q2b",symbol="♛",pos=[row, col])
+            q2b= Queen(color="black",type="queen",moves=0,id="q2b",symbol="♛",pos=[row, col],image=constants.black_queen)
             your_pieces.append(q2b)
 
 def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
@@ -583,6 +584,7 @@ def all_new_moves_opponent_for_check(player, pieces_white, pieces_black):
     return all_new_moves_your_color
 
 def castling_check(new_col, original_col, new_row, you_sim):
+    # updates rooks position if castled
     if new_col > original_col:
             rook_from = [new_row, original_col + 3]
             rook_to   = [new_row, original_col + 1]
@@ -653,9 +655,10 @@ def is_opponent_king_in_check(you, opponent, pieces_white, pieces_black):
 
 def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
     
+    # opponent kings original position
     kings_original_row, kings_original_col = next(a.pos for a in opponent if a.type == "king")
 
-    # makes list of opponenets possible next moves
+    # makes list of opponent possible next moves
     opponent_next_moves_passive = []
     for a in opponent:
         next_move_while_in_check = (a.rule(white_pieces,black_pieces))
@@ -665,9 +668,10 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
                 'id': a.id,
             })
     
-    
-    # for each move make a board simulation updating sim_opponenent with theroetical move
+    # for each possible next move, make a board simulation
+    # updating sim_opponenent with the theroetical move position
     list_of_trues = []
+    list_of_safe_moves = []
     for a in opponent_next_moves_passive:  
         
         sim_you = copy.deepcopy(you)
@@ -676,21 +680,19 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
         sim_row = a["pos"][0]
         sim_col = a["pos"][1]
 
+        # if king castled
         if "king" in a["id"]:
-            
             king_moved_two = abs(sim_col - kings_original_col) == 2 and sim_row == kings_original_row
-
             if king_moved_two:
                 castling_check(new_col=sim_col,original_col=kings_original_col,new_row=sim_row,you_sim=sim_opponent)
 
-
-        # every other key but pos stays the same, pos is updated
+        # pos is updated in simulated pieces list
         for x in sim_opponent:
             if x.id == a["id"]:
                 x.pos = [sim_row, sim_col]
                 break
 
-        # Check if one of your pieces was captured and remove it
+        # check if one of your pieces was captured and remove it
         captured_piece = None
         for piece in sim_you:
             if piece.pos == [sim_row, sim_col]:
@@ -699,21 +701,24 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
         if captured_piece:
             sim_you.remove(captured_piece)
 
+        # find the opponents king
         for k in sim_opponent:
             if k.type == "king":
                 king_row = k.pos[0] 
                 king_col = k.pos[1]
 
+                # if opponent kings pos is in any of your next moves, append a true to list
                 if you == white_pieces:
                     if [king_row, king_col] in all_new_moves_opponent_for_check(player=sim_you, pieces_white=sim_you, pieces_black=sim_opponent):
                         list_of_trues.append(True)
                         break
-                
+
                 elif you == black_pieces:
                     if [king_row, king_col] in all_new_moves_opponent_for_check(player=sim_opponent, pieces_white=sim_opponent, pieces_black=sim_you):
                         list_of_trues.append(True)
                         break
     
+    # if the lists length is equal to opponents possible next moves, its checkmate/stalemate, otherwise not
     if len(list_of_trues) == len(opponent_next_moves_passive) and len(opponent_next_moves_passive) > 0:
         return True
     return False
