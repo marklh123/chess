@@ -336,42 +336,44 @@ def validate_move(attempted_move):
     elif attempted_move[1] not in ["1","2","3","4","5","6","7","8"]:
         return "bad"
 
-p1w = Pawn(id="p1w",type="pawn",symbol="♙",pos=[2, 2],moves=0,color="white")
-p2w = Pawn(id="p2w",type="pawn",symbol="♙",pos=[6, 1],moves=0,color="white")
-p3w = Pawn(id="p3w",type="pawn",symbol="♙",pos=[6, 2],moves=0,color="white")
-p4w = Pawn(id="p4w",type="pawn",symbol="♙",pos=[6, 3],moves=0,color="white")
-p5w = Pawn(id="p5w",type="pawn",symbol="♙",pos=[6, 4],moves=0,color="white")
-p6w = Pawn(id="p6w",type="pawn",symbol="♙",pos=[6, 5],moves=0,color="white")
-p7w = Pawn(id="p7w",type="pawn",symbol="♙",pos=[6, 6],moves=0,color="white")
-p8w = Pawn(id="p8w",type="pawn",symbol="♙",pos=[6, 7],moves=0,color="white")
-r1w = Rook(id="r1w",type="rook",symbol="♖",pos=[7, 2],moves=0,color="white")
-r2w = Rook(id="r2w",type="rook",symbol="♖",pos=[1, 7],moves=0,color="white")
-k1w = Knight(id="k1w",type="knight",symbol="♘",pos=[7, 1],moves=0,color="white")
-k2w = Knight(id="k2w",type="knight",symbol="♘",pos=[7, 6],moves=0,color="white")
-b1w = Bishop(id="b1w",type="bishop",symbol="♗",pos=[7, 2],moves=0,color="white")
-b2w = Bishop(id="b2w",type="bishop",symbol="♗",pos=[7, 5],moves=0,color="white")
-qw = Queen(id="qw",type="queen",symbol="♕",pos=[1, 0],moves=0,color="white")
-kingw = King(id="kingw",type="king",symbol="♔",pos=[3, 6],moves=0,color="white")
+p1w = Pawn(id="p1w",type="pawn",symbol="♙",pos=[6, 0],moves=0,color="white",)
+p2w = Pawn(id="p2w",type="pawn",symbol="♙",pos=[6, 1],moves=0,color="white",)
+p3w = Pawn(id="p3w",type="pawn",symbol="♙",pos=[6, 2],moves=0,color="white",)
+p4w = Pawn(id="p4w",type="pawn",symbol="♙",pos=[6, 3],moves=0,color="white",)
+p5w = Pawn(id="p5w",type="pawn",symbol="♙",pos=[6, 4],moves=0,color="white",)
+p6w = Pawn(id="p6w",type="pawn",symbol="♙",pos=[6, 5],moves=0,color="white",)
+p7w = Pawn(id="p7w",type="pawn",symbol="♙",pos=[6, 6],moves=0,color="white",)
+p8w = Pawn(id="p8w",type="pawn",symbol="♙",pos=[6, 7],moves=0,color="white",)
+r1w = Rook(id="r1w",type="rook",symbol="♖",pos=[7, 0],moves=0,color="white",)
+r2w = Rook(id="r2w",type="rook",symbol="♖",pos=[7, 7],moves=0,color="white",)
+k1w = Knight(id="k1w",type="knight",symbol="♘",pos=[7, 1],moves=0,color="white",)
+k2w = Knight(id="k2w",type="knight",symbol="♘",pos=[7, 6],moves=0,color="white",)
+b1w = Bishop(id="b1w",type="bishop",symbol="♗",pos=[7, 2],moves=0,color="white",)
+b2w = Bishop(id="b2w",type="bishop",symbol="♗",pos=[7, 5],moves=0,color="white",)
+qw = Queen(id="qw",type="queen",symbol="♕",pos=[7, 3],moves=0,color="white",)
+kingw = King(id="kingw",type="king",symbol="♔",pos=[7, 4],moves=0,color="white",)
 
-p1b = Pawn(id="p1b",type="pawn",symbol="♟",pos=[1, 0],moves=0,color="black")
-p2b = Pawn(id="p2b",type="pawn",symbol="♟",pos=[1, 1],moves=0,color="black")
-p3b = Pawn(id="p3b",type="pawn",symbol="♟",pos=[1, 2],moves=0,color="black")
-p4b = Pawn(id="p4b",type="pawn",symbol="♟",pos=[1, 3],moves=0,color="black")
-p5b = Pawn(id="p5b",type="pawn",symbol="♟",pos=[1, 4],moves=0,color="black")
-p6b = Pawn(id="p6b",type="pawn",symbol="♟",pos=[1, 5],moves=0,color="black")
-p7b = Pawn(id="p7b",type="pawn",symbol="♟",pos=[1, 6],moves=0,color="black")
-p8b = Pawn(id="p8b",type="pawn",symbol="♟",pos=[1, 7],moves=0,color="black")
-r1b = Rook(id="r1b",type="rook",symbol="♜",pos=[0, 0],moves=0,color="black")
-r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 7],moves=0,color="black")
-k1b = Knight(id="k1b",type="knight",symbol="♞",pos=[0, 1],moves=0,color="black")
-k2b = Knight(id="k2b",type="knight",symbol="♞",pos=[0, 6],moves=0,color="black")
-b1b = Bishop(id="b1b",type="bishop",symbol="♝",pos=[0, 2],moves=0,color="black")
+p1b = Pawn(id="p1b",type="pawn",symbol="♟",pos=[1, 0],moves=0,color="black",)
+p2b = Pawn(id="p2b",type="pawn",symbol="♟",pos=[1, 1],moves=0,color="black",)
+p3b = Pawn(id="p3b",type="pawn",symbol="♟",pos=[1, 2],moves=0,color="black",)
+p4b = Pawn(id="p4b",type="pawn",symbol="♟",pos=[1, 3],moves=0,color="black",)
+p5b = Pawn(id="p5b",type="pawn",symbol="♟",pos=[1, 4],moves=0,color="black",)
+p6b = Pawn(id="p6b",type="pawn",symbol="♟",pos=[1, 5],moves=0,color="black",)
+p7b = Pawn(id="p7b",type="pawn",symbol="♟",pos=[1, 6],moves=0,color="black",)
+p8b = Pawn(id="p8b",type="pawn",symbol="♟",pos=[1, 7],moves=0,color="black",)
+r1b = Rook(id="r1b",type="rook",symbol="♜",pos=[0, 0],moves=0,color="black",)
+r2b = Rook(id="r2b",type="rook",symbol="♜",pos=[0, 7],moves=0,color="black",)
+k1b = Knight(id="k1b",type="knight",symbol="♞",pos=[0, 1],moves=0,color="black",)
+k2b = Knight(id="k2b",type="knight",symbol="♞",pos=[0, 6],moves=0,color="black",)
+b1b = Bishop(id="b1b",type="bishop",symbol="♝",pos=[0, 2],moves=0,color="black",)
 b2b = Bishop(id="b2b",type="bishop",symbol="♝",pos=[0, 5],moves=0,color="black")
-qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black")
-kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 2],moves=0,color="black")
+qb= Queen(id="qb",type="queen",symbol="♛",pos=[0, 3],moves=0,color="black",)
+kingb = King(id="kingb",type="king",symbol="♚",pos=[0, 4],moves=0,color="black")
 
-pieces_white = [p1w,kingw,r1w,r2w,qw]
-pieces_black = [kingb]
+
+pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,b1w,b2w,k1w,k2w,kingw,qw]
+pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,b1b,b2b,k1b,k2b,qb,kingb]
+
 
 def main():
 
@@ -672,12 +674,16 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
             print("this piece can't move")
             return False
 
-        print("Select square to move to (example a5)")
+        print("Select square to move to (example a5, cancel to cancel)")
         attempted_move_2 = input()
+
+        if attempted_move_2 == "cancel":
+            return False
 
         if validate_move(attempted_move_2) == "bad":
             print("Invalid move, try again.")
             continue
+
 
         col, row = int(letter_index[attempted_move_2[0]]) , 8 - int(attempted_move_2[1]) 
     

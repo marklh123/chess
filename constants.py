@@ -58,7 +58,6 @@ spots_black = [(810,25), (856.6,25), (903.2,25), (950,25),
                (810,225), (856.6,225), (903.2, 225), (950,225),
                (810,325), (856.6,325), (903.2, 325), (950,325)]
 
-spots_white = [(825,425), (925,425), (825,525), (925,525), (825, 625), (925, 625), (825, 725), (925, 825)]
 spots_white = [(810,425), (856.6,425), (903.2,425), (950,425), 
                (810,525), (856.6,525), (903.2, 525), (950,525), 
                (810,625), (856.6,625), (903.2, 625), (950,625),
@@ -67,6 +66,20 @@ spots_white = [(810,425), (856.6,425), (903.2,425), (950,425),
 
 pos_to_pixel = {0:25,1:125,2:225,3:325,4:425,5:525,6:625,7:725}
 pos_to_pixel_reversed = {0:725,1:625,2:525,3:425,4:325,5:225,6:125,7:25}
+
+# pre game UI, choose gamemode
+pre_game_background = pygame.Surface((1000,900)) 
+pre_game_background.fill((160, 199, 250))
+
+pregame_text = font_turn.render(f"Choose A Gamemode", True, "Black")
+
+pvp_background = pygame.Surface((250,200)) 
+pvp_background.fill((130,170,230))
+pvp_text = font_turn.render(f"PVP", True, "Black")
+
+pve_background = pygame.Surface((250,200)) 
+pve_background.fill((130,170,230))
+pve_text = font_turn.render(f"BOT", True, "Black")
 
 
 
