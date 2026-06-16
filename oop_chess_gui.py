@@ -10,6 +10,7 @@ clock = pygame.time.Clock()
 from constants import pos_to_pixel
 import constants
 import random
+import time
 
 def get_pixels(pos):
     """ Convert a digit position into a pixel position """
@@ -150,17 +151,20 @@ class App:
         self.selected_piece = random.choice(self.you)
         self.available_moves = self.selected_piece.rule(pieces_white, pieces_black)
 
+        print("Available_moves AI 1: ", self.available_moves)
+
         if len(self.available_moves) == 0:
             print("This piece had no moves")
             self.bot_select_piece()
 
+        print("Available_moves AI 2: ", self.available_moves)
         self.clicked_row, self.clicked_col = random.choice(self.available_moves)
         print("Selected piece AI: ", self.selected_piece.type, self.selected_piece.pos, self.selected_piece.color)
 
         self.bot_move_piece()
 
-
     def on_loop(self):
+            # check if its bots turn
             if self.active_player_index == 1 and self.pve:
                 if self.selected_piece == None:
                     self.bot_select_piece()
@@ -171,7 +175,8 @@ class App:
         elif event.type == MOUSEBUTTONDOWN:
             x,y = event.pos
             print(x,y)
-
+            
+            # title screen button areas, select gamemode
             if self.pre_game:
                 if x in range(220,470) and y in range(400,600):
                     print("PVP Activated!")
@@ -187,37 +192,23 @@ class App:
                 self.set_player_and_opp()
                 
                 self.clicked_row, self.clicked_col = pixel_to_board(x, y)  
-                # print("Clicked row and col: ", self.clicked_row, self.clicked_col)
 
+                # first click: select a piece
                 if self.selected_piece is None:
-                    # print("selected piece is none")
-                    # First click: select a piece
-                    print(self.you)
+                    for p in self.you:
+                        if p.pos == [self.clicked_row, self.clicked_col]:
+                            self.selected_piece = p
 
-                    if not self.pve or (self.pve and self.active_player_index == 0):
-                        
-                        for p in self.you:
-                            # print("p pos.color: ",p.color)
-                            # print("ur color: ", [x.color for x in self.you],self.active_player_index)
-                            if p.pos == [self.clicked_row, self.clicked_col]:
-                                self.selected_piece = p
+                            # get valid moves for this piece
+                            self.available_moves = p.rule(pieces_white, pieces_black)
+                            break
 
-                                # get valid moves for this piece
-                                self.available_moves = p.rule(pieces_white, pieces_black)
-                                # print("found a piece and its moves")
-                                break
-                    
+                # second click: check if move valid
                 else:
-                    # Second click: move if valid
 
-                    # check if this target position is valid first
+                    # see if target position is valid first
                     target = [self.clicked_row, self.clicked_col]
                     clicked_row_two, clicked_col_two = self.clicked_row, self.clicked_col
-
-                    # if not self.pve or (self.pve and self.active_player_index == 0):
-                    #     clicked_row_two, clicked_col_two = self.clicked_row, self.clicked_col
-                    # else:
-                    #     clicked_row_two,clicked_col_two = random.choice(self.available_moves)
                     
                     check_ = is_your_king_in_check(self.you, self.opp, self.selected_piece, clicked_row_two, clicked_col_two, pieces_white,pieces_black)
 
@@ -240,7 +231,6 @@ class App:
                                     "col": self.clicked_col,
                                     "row": self.clicked_row,}
                             self.log_records.append(record)
-                            
                             valid_move = True
                         
                         # check for castling
@@ -276,7 +266,7 @@ class App:
                         # pawn promotion
                         PawnPromotion(self.selected_piece, self.clicked_row, self.clicked_col, pieces_white, pieces_black)
 
-                        # check and checkmate
+                        # check and checkmate (for text)
                         self.white_in_check = False
                         self.black_in_check = False
 
@@ -388,7 +378,7 @@ class App:
         if self.on_init() == False:
             self._running = False
  
-        while( self._running ):
+        while(self._running):
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_loop()
