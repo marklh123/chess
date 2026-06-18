@@ -156,7 +156,7 @@ class App:
         if len(self.available_moves) == 0:
             print("This piece had no moves")
             self.bot_select_piece()
-            return
+            return # stops after inner function ends 
 
         print("Available_moves AI 2: ", self.available_moves)
         self.clicked_row, self.clicked_col = random.choice(self.available_moves)
