@@ -10,7 +10,6 @@ clock = pygame.time.Clock()
 from constants import pos_to_pixel
 import constants
 import random
-import time
 
 def get_pixels(pos):
     """ Convert a digit position into a pixel position """
@@ -139,7 +138,7 @@ class App:
                 self.stalemate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
 
             self.active_player_index = (self.active_player_index + 1) % 2
-            
+        
         # either way, deselect
         self.selected_piece = None
         self.clicked_row = None
@@ -148,6 +147,7 @@ class App:
 
     def bot_select_piece(self):
         self.set_player_and_opp()
+        print(self.you)
         self.selected_piece = random.choice(self.you)
         self.available_moves = self.selected_piece.rule(pieces_white, pieces_black)
 
@@ -156,10 +156,11 @@ class App:
         if len(self.available_moves) == 0:
             print("This piece had no moves")
             self.bot_select_piece()
+            return
 
         print("Available_moves AI 2: ", self.available_moves)
         self.clicked_row, self.clicked_col = random.choice(self.available_moves)
-        print("Selected piece AI: ", self.selected_piece.type, self.selected_piece.pos, self.selected_piece.color)
+        print("Selected piece AI: ", self.selected_piece.type, self.selected_piece.pos, self.selected_piece)
 
         self.bot_move_piece()
 
@@ -168,6 +169,8 @@ class App:
             if self.active_player_index == 1 and self.pve:
                 if self.selected_piece == None:
                     self.bot_select_piece()
+            else:
+                print("No pve")
        
     def on_event(self, event):
         if event.type == pygame.QUIT:
