@@ -17,7 +17,6 @@ A two-player chess game built with Python and Pygame. Includes a full graphical 
 ## Limitations
 - Pawn promotion always promotes to queen, no piece choice
 - No en passant moves
-- No AI opponent, local two-player only
 - No draw by repetition or 50-move rule
 
 ## Lessons learned
