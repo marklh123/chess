@@ -84,11 +84,11 @@ class App:
             
             check_ = is_your_king_in_check(self.you, self.opp, self.selected_piece, clicked_row_two, clicked_col_two, pieces_white,pieces_black)
 
+            # can't do moves that don't save king while in check
             if check_ and target in self.available_moves:
                 self.available_moves.remove(target)
 
             if target in self.available_moves:
-                clicked_row_two, clicked_col_two = self.clicked_row, self.clicked_col
                 valid_move = False
 
                 # normal move
@@ -120,10 +120,8 @@ class App:
                         self.you  # your color
                     )
 
-                    if result == "not_castling":
-                        valid_move = True
-                        
-                    elif result == "done castling":
+                    # if castling didn't fail its a valid move
+                    if result != "cancel castling":
                         valid_move = True
                         
                 # move the piece
@@ -193,11 +191,12 @@ class App:
 
             # after title screen, actual game
             else:
-                # change player and opponent based of active player index count
-                self.set_player_and_opp()
-                
-                self.clicked_row, self.clicked_col = pixel_to_board(x, y)  
-                self.select_and_move_piece()
+                if not self.checkmate or self.stalemate:
+                    # change player and opponent based of active player index count
+                    self.set_player_and_opp()
+                    self.clicked_row, self.clicked_col = pixel_to_board(x, y)  
+                    
+                    self.select_and_move_piece()
                 
     def on_render(self):
         if not self.pre_game:
