@@ -14,8 +14,8 @@ import random
 def get_pixels(pos):
     # Convert a digit position into a pixel position
 
-    row_pixel = constants.pos_to_pixel[pos[0]]
-    col_pixel = constants.pos_to_pixel[pos[1]]
+    row_pixel = constants.pos_to_pixel[pos[0]] - 15
+    col_pixel = constants.pos_to_pixel[pos[1]] 
     return col_pixel, row_pixel
 
 def pixel_to_board(x_pixel, y_pixel):
@@ -128,6 +128,7 @@ class App:
                 if valid_move:
                     self.selected_piece.pos = [clicked_row_two, clicked_col_two]
                     self.selected_piece.moves += 1
+                    constants.move_piece_sound.play()
                 
                 # remove any captured opponent piece
                 Takes(pieces_white,pieces_black,self.selected_piece,self.taken_pieces_white,self.taken_pieces_black)
@@ -180,6 +181,8 @@ class App:
             self._running = False
         elif event.type == MOUSEBUTTONDOWN:
             x,y = event.pos
+
+            print(f"Clicked at: {x},{y}")
             
             # title screen button areas, select gamemode
             if self.pre_game:
@@ -199,32 +202,43 @@ class App:
                     self.select_and_move_piece()
                 
     def on_render(self):
+
+        def animate(sprite_list,speed):
+            if constants.yellow_current_index < len(sprite_list) - 1:
+                constants.yellow_current_index += speed
+            else:
+                constants.yellow_current_index = 0
+
+            # update image
+            constants.yellow_current_image = constants.yellow_animation_list[int(constants.yellow_current_index)]
+            
+
         if not self.pre_game:
+            self.screen.blit(constants.surface_turn_background, (0,0))
             self.screen.blit(constants.board_surface, (0, 0))
-            self.screen.blit(constants.surface_turn_background, (0, 800))
-            self.screen.blit(constants.taken_pieces, (800,0))
+            # self.screen.blit(constants.taken_pieces, (800,0))
 
             # highlight squares for players move
             if self.selected_piece and not self.pve or (self.pve and self.you == pieces_white):
                 for move in self.available_moves:
-                    # highlight available squares in yellow
-                    highlight = pygame.Surface((constants.square_size, constants.square_size),
-                                            pygame.SRCALPHA)
-                    highlight.fill((250, 250, 0, 100)) 
 
+                    # faster animation when theres more moves, slower animation when theres less moves, why?
+
+
+                    # highlight available squares in yellow
+                    
                     px = pos_to_pixel[move[1]]
                     py = pos_to_pixel[move[0]]
 
-                    self.screen.blit(highlight, (px - 25, py - 25))  # highlighted path is centered
+                    animate(constants.yellow_animation_list, 0.04/len(self.available_moves))
+
+                    self.screen.blit(constants.yellow_animation_list[int(constants.yellow_current_index)], (px - 20, py - 20))  # highlighted path is centered
 
                     # highlight under selected piece in red
                     square_row = constants.pos_to_pixel[self.clicked_row]
                     square_col = constants.pos_to_pixel[self.clicked_col]
 
-                    cancel_move = pygame.Surface((constants.square_size, constants.square_size), pygame.SRCALPHA)
-                    cancel_move.fill((255, 0, 0, 100)) 
-
-                    self.screen.blit(cancel_move, (square_col - 25, square_row - 25))
+                    self.screen.blit(constants.cancel_move, (square_col - 60, square_row - 55))
 
             # draw all pieces
             for piece in pieces_white + pieces_black:
@@ -262,13 +276,13 @@ class App:
             name2 = "white" if self.active_player_index == 1 else "black"
 
             if self.stalemate:
-                turn_text = constants.font_turn.render(f"Game over! Tie by stalemate!", True, "Black")
+                turn_text = constants.font_turn.render(f"Game over! Tie by stalemate!", True, "White")
             elif self.checkmate:
-                turn_text = constants.font_turn.render(f"Game over! {name2} wins by checkmate!", True, "Black")
+                turn_text = constants.font_turn.render(f"Game over! {name2} wins by checkmate!", True, "White")
             elif self.black_in_check or self.white_in_check:
-                turn_text = constants.font_turn.render(f"{name}'s turn, you are in check!", True, "Black")
+                turn_text = constants.font_turn.render(f"{name}'s turn, you are in check!", True, "White")
             else:
-                turn_text = constants.font_turn.render(f"It's {name}'s turn.", True, "Black")
+                turn_text = constants.font_turn.render(f"It's {name}'s turn.", True, "White")
             
             self.screen.blit(turn_text, (10, 810))
         elif self.pre_game:
