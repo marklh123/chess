@@ -267,7 +267,7 @@ class App:
                                                 speed= 0.04
                                             )
                         
-                        self.screen.blit(constants.purple_animation_list[int(constants.purple_current_index)], (king_pos_in_pixels[0] - 34, king_pos_in_pixels[1] - 30))
+                        self.screen.blit(constants.purple_animation_list[int(constants.purple_current_index)], (king_pos_in_pixels[0] - 39, king_pos_in_pixels[1] - 26))
 
                 if piece.color == "white" and piece.type == "king":
                     if self.white_in_check:
@@ -280,7 +280,7 @@ class App:
                             speed= 0.04
                         )
                                                 
-                        self.screen.blit(constants.purple_animation_list[int(constants.purple_current_index)], (king_pos_in_pixels[0] - 34, king_pos_in_pixels[1] -30))
+                        self.screen.blit(constants.purple_animation_list[int(constants.purple_current_index)], (king_pos_in_pixels[0] - 39, king_pos_in_pixels[1] - 26))
                     
                 digit_pos = piece.pos
                 pos_in_pixels = get_pixels(digit_pos)
