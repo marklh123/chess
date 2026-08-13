@@ -153,17 +153,17 @@ pos_to_pixel_reversed = {0:725,1:625,2:525,3:425,4:325,5:225,6:125,7:25}
 
 # pre game UI, choose gamemode
 pre_game_background = pygame.Surface((1000,900)) 
-pre_game_background.fill((160, 199, 250))
+pre_game_background.fill((0, 0, 0))
 
-pregame_text = font_turn.render(f"Choose A Gamemode", True, "Black")
+pregame_text = font_turn.render(f"Choose A Gamemode", True, "White")
 
 pvp_background = pygame.Surface((250,200)) 
-pvp_background.fill((130,170,230))
-pvp_text = font_turn.render(f"PVP", True, "White")
+pvp_background.fill((255,255,255))
+pvp_text = font_turn.render(f"PVP", True, "Black")
 
 pve_background = pygame.Surface((250,200)) 
-pve_background.fill((130,170,230))
-pve_text = font_turn.render(f"BOT", True, "White")
+pve_background.fill((255,255,255))
+pve_text = font_turn.render(f"BOT", True, "Black")
 
 move_piece_sound = pygame.mixer.Sound("./assets/sounds/piece_movement.mp3")
 check_sound = pygame.mixer.Sound("./assets/sounds/check.mp3")
