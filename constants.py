@@ -84,6 +84,40 @@ yellow_animation_list = [yellow_spell_step_1,yellow_spell_step_2,yellow_spell_st
 yellow_current_index = 0
 yellow_current_image = yellow_animation_list[yellow_current_index]
 
+
+
+purple_spell_step_1 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell1.png')
+purple_spell_step_1 = pygame.transform.scale(purple_spell_step_1, (130,130))
+purple_spell_step_2 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell2.png')
+purple_spell_step_2 = pygame.transform.scale(purple_spell_step_2, (130,130))
+purple_spell_step_3 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell3.png')
+purple_spell_step_3 = pygame.transform.scale(purple_spell_step_3, (130,130))
+purple_spell_step_4 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell4.png')
+purple_spell_step_4 = pygame.transform.scale(purple_spell_step_4, (130,130))
+purple_spell_step_5 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell5.png')
+purple_spell_step_5 = pygame.transform.scale(purple_spell_step_5, (130,130))
+purple_spell_step_6 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell6.png')
+purple_spell_step_6 = pygame.transform.scale(purple_spell_step_6, (130,130))
+purple_spell_step_7 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell7.png')
+purple_spell_step_7 = pygame.transform.scale(purple_spell_step_7, (130,130))
+purple_spell_step_8 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell8.png')
+purple_spell_step_8 = pygame.transform.scale(purple_spell_step_8, (130,130))
+purple_spell_step_9 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell9.png')
+purple_spell_step_9 = pygame.transform.scale(purple_spell_step_9, (130,130))
+purple_spell_step_10 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell10.png')
+purple_spell_step_10 = pygame.transform.scale(purple_spell_step_10, (130,130))
+purple_spell_step_11 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell11.png')
+purple_spell_step_11 = pygame.transform.scale(purple_spell_step_11, (130,130))
+purple_spell_step_12 = pygame.image.load('./assets/images/purple_spell_frames/purple_spell12.png')
+purple_spell_step_12 = pygame.transform.scale(purple_spell_step_12, (130,130))
+
+purple_animation_list = [purple_spell_step_1,purple_spell_step_2,purple_spell_step_3,purple_spell_step_4,purple_spell_step_5,purple_spell_step_6,purple_spell_step_7,purple_spell_step_8,purple_spell_step_9,purple_spell_step_10,purple_spell_step_11,purple_spell_step_12]
+purple_current_index = 0
+purple_current_image = purple_animation_list[purple_current_index]
+purple_current_image.set_alpha(100)
+
+
+
 cancel_move = pygame.image.load('./assets/images/redx.png')
 cancel_move.set_alpha(128)
 cancel_move = pygame.transform.scale(cancel_move, (170,170))
@@ -97,7 +131,8 @@ board_surface = pygame.transform.scale(board_surface, (800, 800))
 # where text will be under board
 surface_turn_background = pygame.Surface((1000,900)) # width and height
 surface_turn_background.fill((0,0,0))
-font_turn = pygame.font.Font(None, 50) # font type, font size
+# font_turn = pygame.font.Font(None, 50) # font type, font size
+font_turn = pygame.font.Font('./assets/fonts/alagard.ttf',45)
 
 # shows taken pieces section
 taken_pieces = pygame.Surface((200,900))
@@ -130,7 +165,9 @@ pve_background = pygame.Surface((250,200))
 pve_background.fill((130,170,230))
 pve_text = font_turn.render(f"BOT", True, "White")
 
-move_piece_sound = pygame.mixer.Sound("./assets/sounds/chess_sound.mp3")
+move_piece_sound = pygame.mixer.Sound("./assets/sounds/piece_movement.mp3")
+check_sound = pygame.mixer.Sound("./assets/sounds/check.mp3")
+checkmate_sound = pygame.mixer.Sound("./assets/sounds/checkmate.mp3")
 
 is_running = True
 

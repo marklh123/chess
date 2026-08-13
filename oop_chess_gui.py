@@ -148,9 +148,19 @@ class App:
                         self.black_in_check = True
 
                     self.checkmate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
+
+                    if self.checkmate:
+                        constants.checkmate_sound.play()
+                    else:
+                        constants.check_sound.play()
+
+                        
                 
                 elif not check_:
                     self.stalemate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
+
+                    if self.checkmate:
+                        constants.checkmate_sound.play()
 
                 self.active_player_index = (self.active_player_index + 1) % 2
                 
@@ -203,15 +213,15 @@ class App:
                 
     def on_render(self):
 
-        def animate(sprite_list,speed):
-            if constants.yellow_current_index < len(sprite_list) - 1:
-                constants.yellow_current_index += speed
+        def animate(sprite_list,index,speed):
+            if index < len(sprite_list) - 1:
+                print(f'{index} += {speed} == {index+speed}')
+                index += speed
+                print("yes")
             else:
-                constants.yellow_current_index = 0
+                index = 0
 
-            # update image
-            constants.yellow_current_image = constants.yellow_animation_list[int(constants.yellow_current_index)]
-            
+            return index
 
         if not self.pre_game:
             self.screen.blit(constants.surface_turn_background, (0,0))
@@ -222,48 +232,59 @@ class App:
             if self.selected_piece and not self.pve or (self.pve and self.you == pieces_white):
                 for move in self.available_moves:
 
-                    # faster animation when theres more moves, slower animation when theres less moves, why?
-
-
                     # highlight available squares in yellow
                     
                     px = pos_to_pixel[move[1]]
                     py = pos_to_pixel[move[0]]
 
-                    animate(constants.yellow_animation_list, 0.04/len(self.available_moves))
+                    constants.yellow_current_index = animate(
+                        sprite_list=constants.yellow_animation_list,
+                        index=float(constants.yellow_current_index),
+                        speed= 0.04/len(self.available_moves))
 
                     self.screen.blit(constants.yellow_animation_list[int(constants.yellow_current_index)], (px - 20, py - 20))  # highlighted path is centered
 
                     # highlight under selected piece in red
                     square_row = constants.pos_to_pixel[self.clicked_row]
                     square_col = constants.pos_to_pixel[self.clicked_col]
-
+                    
                     self.screen.blit(constants.cancel_move, (square_col - 60, square_row - 55))
 
             # draw all pieces
             for piece in pieces_white + pieces_black:
-                digit_pos = piece.pos
-                pos_in_pixels = get_pixels(digit_pos)
-                self.screen.blit(piece.image, pos_in_pixels)
+                # digit_pos = piece.pos
+                # pos_in_pixels = get_pixels(digit_pos)
+                # self.screen.blit(piece.image, pos_in_pixels)
             
                 if piece.color == "black" and piece.type == "king":
                     if self.black_in_check:
                         king_digit_pos = piece.pos[0], piece.pos[1]
                         king_pos_in_pixels = get_pixels(king_digit_pos)
 
-                        check_king_surface = pygame.Surface((constants.square_size, constants.square_size),
-                                                            pygame.SRCALPHA)
-                        check_king_surface.fill((0,0,255,100))
-                        self.screen.blit(check_king_surface, (king_pos_in_pixels[0]-25,king_pos_in_pixels[1]-25))
+                        constants.purple_current_index = animate(
+                                                sprite_list=constants.purple_animation_list,
+                                                index=float(constants.purple_current_index),
+                                                speed= 0.04
+                                            )
+                        
+                        self.screen.blit(constants.purple_animation_list[int(constants.purple_current_index)], (king_pos_in_pixels[0] - 34, king_pos_in_pixels[1] - 30))
+
                 if piece.color == "white" and piece.type == "king":
                     if self.white_in_check:
                         king_digit_pos = piece.pos[0], piece.pos[1]
                         king_pos_in_pixels = get_pixels(king_digit_pos)
 
-                        check_king_surface = pygame.Surface((constants.square_size, constants.square_size),
-                                                            pygame.SRCALPHA)
-                        check_king_surface.fill((0,0,255,100))
-                        self.screen.blit(check_king_surface, (king_pos_in_pixels[0]-25,king_pos_in_pixels[1]-25))
+                        constants.purple_current_index = animate(
+                            sprite_list=constants.purple_animation_list,
+                            index=float(constants.purple_current_index),
+                            speed= 0.04
+                        )
+                                                
+                        self.screen.blit(constants.purple_animation_list[int(constants.purple_current_index)], (king_pos_in_pixels[0] - 34, king_pos_in_pixels[1] -30))
+                    
+                digit_pos = piece.pos
+                pos_in_pixels = get_pixels(digit_pos)
+                self.screen.blit(piece.image, pos_in_pixels)
 
             # draw taken pieces
             for x, piece in enumerate(self.taken_pieces_black):
