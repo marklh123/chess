@@ -50,6 +50,7 @@ class App:
         self.taken_pieces_white = []
         self.taken_pieces_black = []
         self.pve = False
+        self.pawn_double_move = False
 
     def set_player_and_opp(self):
         self.you = pieces_white if self.active_player_index == 0 else pieces_black
@@ -70,7 +71,11 @@ class App:
                         self.selected_piece = p
 
                         # get valid moves for this piece
-                        self.available_moves = p.rule(pieces_white, pieces_black)
+
+                        if self.selected_piece.type == "pawn":
+                            self.available_moves = p.rule(pieces_white, pieces_black, self.pawn_double_move)
+                        else:
+                            self.available_moves = p.rule(pieces_white, pieces_black)
                         break
             # for bot
             else:
@@ -126,6 +131,17 @@ class App:
                         
                 # move the piece
                 if valid_move:
+
+                    if self.selected_piece.type == "pawn" and abs(clicked_row_two - self.selected_piece.pos[0]) == 2:
+                        print("Double move!!!")
+        
+                        self.pawn_double_move = True
+                    else:
+                        self.pawn_double_move = False
+
+                    print(f"Inital pos: {self.selected_piece.pos[0]},{self.selected_piece.pos[1]}")
+                    print(f"New pos: {clicked_row_two},{clicked_col_two}")
+                    
                     self.selected_piece.pos = [clicked_row_two, clicked_col_two]
                     self.selected_piece.moves += 1
                     constants.move_piece_sound.play()
@@ -173,7 +189,11 @@ class App:
     def bot_select_piece(self):
         self.set_player_and_opp()
         self.selected_piece = random.choice(self.you)
-        self.available_moves = self.selected_piece.rule(pieces_white, pieces_black)
+
+        if self.selected_piece.type == "pawn":
+            self.available_moves = self.selected_piece.rule(pieces_white, pieces_black,self.pawn_double_move)
+        else:
+            self.available_moves = self.selected_piece.rule(pieces_white, pieces_black)
 
         if len(self.available_moves) == 0:
             self.bot_select_piece()
@@ -191,8 +211,6 @@ class App:
             self._running = False
         elif event.type == MOUSEBUTTONDOWN:
             x,y = event.pos
-
-            print(f"Clicked at: {x},{y}")
             
             # title screen button areas, select gamemode
             if self.pre_game:
@@ -215,9 +233,7 @@ class App:
 
         def animate(sprite_list,index,speed):
             if index < len(sprite_list) - 1:
-                print(f'{index} += {speed} == {index+speed}')
                 index += speed
-                print("yes")
             else:
                 index = 0
 

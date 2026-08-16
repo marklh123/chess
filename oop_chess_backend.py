@@ -2,9 +2,10 @@ import copy
 import constants
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
-#BUG: Some complex checkmates don't get detected
-# Like a checkmate where the piece that delivers checkmate is protected by another piece
-# defiently something to do with get all moves for check function
+
+# En passant
+# If i do en passant then the new pos for the take gets appened
+# then the takes function doesnt detect the take since its not
 
 class Board:
     def __init__(self,pieces_white,pieces_black):
@@ -62,7 +63,7 @@ class Piece():
 class Pawn(Piece):  
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol,image)
-    def rule_pawn_takes(self,pieces_white,pieces_black):
+    def rule_pawn_takes(self,pieces_white,pieces_black,pawn_double_move):
         if self.color == "white":
             direction = -1
             op_pieces = pieces_black
@@ -82,8 +83,14 @@ class Pawn(Piece):
                 ([op_row, op_col] == [row + direction, col - 1])):
                 takes.append([op_row, op_col])
 
+            # en passant
+            if pawn_double_move and ([op_row,op_col] == [row, col+1] or
+                                    [op_row,op_col] == [row, col-1]):
+                takes.append([op_row+direction,op_col]) 
+        
         return takes
-    def rule(self,pieces_white,pieces_black):
+    
+    def rule(self,pieces_white,pieces_black,pawn_double_move):
 
         row, col = self.pos
 
@@ -119,7 +126,7 @@ class Pawn(Piece):
                 new_pos.remove([row, col])
 
         #takes
-        takes = self.rule_pawn_takes(pieces_white,pieces_black)
+        takes = self.rule_pawn_takes(pieces_white,pieces_black,pawn_double_move)
         new_pos.extend(takes)
 
         return new_pos
@@ -394,6 +401,7 @@ pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,b1w,b2w,k1w,k2w,kingw,qw
 pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,b1b,b2b,k1b,k2b,qb,kingb]
 
 board = Board(pieces_white,pieces_black)
+pawn_double_move = False
 
 def main():
     
@@ -442,7 +450,10 @@ def find_piece(you,pieces_white,pieces_black,piece_pos):
     
     for x in your_dict:
         if piece_pos == x.pos:
-            piece_aviable_moves = x.rule(pieces_white,pieces_black)
+            if x.type == "pawn":
+                piece_aviable_moves = x.rule(pieces_white,pieces_black,pawn_double_move)
+            else:
+                piece_aviable_moves = x.rule(pieces_white,pieces_black)
             return piece_aviable_moves
     return "Not a piece"
 
@@ -468,10 +479,11 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
 
 def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
     opponent_pieces = pieces_black if piece.color == "white" else pieces_white
+    direction = -1 if piece.color == "white" else 1
 
     for x, op in enumerate(opponent_pieces):
 
-        if op.pos == piece.pos:
+        if op.pos == piece.pos or [op.pos[0],op.pos[1]] == [piece.pos[0]-direction,piece.pos[1]]:
             del opponent_pieces[x]
 
             match op.type:
@@ -511,8 +523,6 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
                 take_list_black.append(taken_piece)
 
             break
-
-       
 
 def Castling(black, white, xx, col, new_col, new_row, your_color):
 
@@ -573,7 +583,7 @@ def all_new_moves_opponent_for_check(player, pieces_white, pieces_black):
     all_new_moves_your_color = []
     for i in player: # player = white or black
         if i.type == "pawn":
-            all_new_moves_your_color.extend(i.rule_pawn_takes(pieces_white,pieces_black))
+            all_new_moves_your_color.extend(i.rule_pawn_takes(pieces_white,pieces_black,False))
         else:
             all_new_moves_your_color.extend(i.rule(pieces_white,pieces_black))
 
@@ -657,7 +667,10 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
     # makes list of opponent possible next moves
     opponent_next_moves_passive = []
     for a in opponent:
-        next_move_while_in_check = (a.rule(white_pieces,black_pieces))
+        if a.type == "pawn":
+            next_move_while_in_check = (a.rule(white_pieces,black_pieces,False))
+        else:
+            next_move_while_in_check = (a.rule(white_pieces,black_pieces))
         for x in next_move_while_in_check:
             opponent_next_moves_passive.append({
                 'pos': [x[0], x[1]],
@@ -757,6 +770,7 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                             return False
 
                         if ((x.type != 'king') or (x.type == 'king' and x.moves > 0)):
+
                             x.pos = [row,col]
                             x.moves+=1
                         else: # castling
