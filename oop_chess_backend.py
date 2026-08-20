@@ -1,11 +1,13 @@
 import copy
 import constants
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
+index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
 
-# En passant
-# If i do en passant then the new pos for the take gets appened
-# then the takes function doesnt detect the take since its not
+# En passant doesnt get considered for check or checkmate
+# white bishops sometimes can't take black pieces on blacks back rank, doesn't take and image disapears on the same square, 
+# white queen too
+
 
 class Board:
     def __init__(self,pieces_white,pieces_black):
@@ -15,6 +17,7 @@ class Board:
         self.pieces_black = pieces_black
         self.taken_list_white = []
         self.taken_list_black = []
+        self.captured_pieces_history = {"w":self.taken_list_black,"b":self.taken_list_white}
 
     def board_print(self):
 
@@ -37,6 +40,165 @@ class Board:
 
     def change_turns(self):
         self.active_player_index = (self.active_player_index + 1) % 2
+
+    # functions for testing
+    def get_moves(self):
+
+        you = self.pieces_white if self.active_player_index == 0 else self.pieces_black
+        opp = self.pieces_white if self.active_player_index == 1 else self.pieces_black
+        moves = []
+
+        for piece in you:
+            piece_moves = piece.rule(self.pieces_white,self.pieces_black,False) if piece.type == "pawn" else piece.rule(self.pieces_white,self.pieces_black)
+            for move in piece_moves:
+
+                # if kings in check and move doesn't save king, skip it
+                check_ = is_your_king_in_check(you, opp, piece, move[0], move[1], self.pieces_white,self.pieces_black)
+                if check_: continue 
+                            
+                # # normal move
+                # if ((piece.type != 'king') or
+                #         (piece.moves != 0)):
+    
+                #     valid_move = True
+                
+                # # check for castling
+                # elif piece.type == 'king' and piece.moves == 0:
+                #     king_row = piece.pos[0] 
+                #     king_col = piece.pos[1]  
+    
+                #     result = Castling(
+                #         self.pieces_black, 
+                #         self.pieces_white,
+                #         king_row,  # king's current row
+                #         king_col,  # king's current col letter
+                #         move[0],  # destination col letter
+                #         move[1],  # destination row
+                #         you  # your color
+                #     )
+    
+                #     # if castling didn't fail its a valid move
+                #     if result != "cancel castling":
+                #         valid_move = True
+                        
+                # move the piece
+    
+                you_sim = copy.deepcopy(you)
+                piece_to_change = [piece_sim for piece_sim in you_sim if piece_sim.pos == piece.pos][0]
+                piece_to_change.pos = move
+
+                check_ = is_opponent_king_in_check(you_sim, opp, self.pieces_white, self.pieces_black)
+                if check_:
+    
+                    checkmate = is_checkmate_opponent(you_sim, opp, self.pieces_white, self.pieces_black)
+    
+                    if checkmate:
+                        moves.append([piece.pos,move])
+                        continue
+                    else:
+                        moves.append([piece.pos,move])
+                        continue
+                
+                elif not check_:
+                    stalemate = is_checkmate_opponent(you_sim,opp,pieces_white,pieces_black)
+    
+                    if stalemate:
+                        moves.append([piece.pos,move])
+                        continue
+                
+                moves.append([piece.pos,move])
+                continue
+
+        return moves
+
+    def make_move(self, starting_pos, ending_pos):
+        selected_piece = None
+        valid_move = False
+        
+        # if the piece isn't found in white or black
+        if starting_pos not in [piece.pos for piece in self.pieces_white+self.pieces_black]:
+            print("PROBLEM: this starting position isnt found for make move")
+            return 
+
+        # find the selected piece from its position
+        for piece in self.pieces_white:
+            if starting_pos == piece.pos:
+                selected_piece = piece
+                you = self.pieces_white
+        for piece in self.pieces_black:
+            if starting_pos == piece.pos:
+                selected_piece = piece
+                you = self.pieces_black
+
+        # normal move
+        if ((selected_piece.type != 'king') or
+                (selected_piece.moves != 0)):
+
+            valid_move = True
+        
+        # check for castling
+        elif selected_piece.type == 'king' and selected_piece.moves == 0:
+            king_row = selected_piece.pos[0] 
+            king_col = selected_piece.pos[1]  
+
+            result = Castling(
+                self.pieces_black, 
+                self.pieces_white,
+                king_row,  # king's current row
+                king_col,  # king's current col letter
+                ending_pos[0],  # destination col letter
+                ending_pos[1],  # destination row
+                you  # your color
+            )
+
+            # if castling didn't fail its a valid move
+            if result != "cancel castling":
+                valid_move = True
+
+        # move the selected piece to legal move
+        if valid_move:
+            selected_piece.pos = ending_pos
+            selected_piece.moves += 1
+
+        # check if move took any pieces
+        Takes(self.pieces_white,self.pieces_black,selected_piece,self.taken_list_white,self.taken_list_black)
+
+        self.change_turns()
+        return starting_pos, ending_pos
+
+    def undo_move(self, starting_pos, ending_pos):
+        selected_piece = None
+                
+        # if new moves positon isn't one of the pieces
+        if ending_pos not in [piece.pos for piece in self.pieces_white+self.pieces_black]:
+            print("PROBLEM: this move to undo isnt found")
+            print(f"Piece went from {index_letter[starting_pos[1]]}{8-(starting_pos[0])} to {index_letter[ending_pos[1]]}{8-(ending_pos[0])}")
+            print(f"Pieces in black and white:")
+            print(f"Black: {[(index_letter[piece.pos[1]],8-(piece.pos[0])) for piece in self.pieces_black]}")
+            print(f"White: {[(index_letter[piece.pos[1]],8-(piece.pos[0])) for piece in self.pieces_white]}")
+            return
+
+        for piece in self.pieces_white:
+            if ending_pos == piece.pos:
+                selected_piece = piece
+        for piece in self.pieces_black:
+            if ending_pos == piece.pos:
+                selected_piece = piece
+
+        selected_piece.pos = starting_pos
+        selected_piece.moves -= 1
+
+        if selected_piece.color == "white":
+            for piece in self.taken_list_black:
+                self.pieces_black.append(piece)
+                self.taken_list_black.remove(piece)
+        elif selected_piece.color == "black":
+            for piece in self.taken_list_white:
+                self.pieces_white.append(piece)
+                self.taken_list_white.remove(piece)
+                        
+        self.change_turns()
+    
 class Piece():
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         self.color = color
@@ -290,7 +452,7 @@ class Queen(Piece):
 
         return new_pos
 class King(Piece):
-    def __init__(self, color, type, pos, moves, id, symbol, image):
+    def __init__(self, color=None, type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol, image)
     def rule(self,pieces_white,pieces_black):
         row, col = self.pos
@@ -371,8 +533,8 @@ p5w = Pawn(id="p5w",type="pawn",symbol="♙",pos=[6, 4],moves=0,color="white",im
 p6w = Pawn(id="p6w",type="pawn",symbol="♙",pos=[6, 5],moves=0,color="white",image=constants.white_pawn)
 p7w = Pawn(id="p7w",type="pawn",symbol="♙",pos=[6, 6],moves=0,color="white",image=constants.white_pawn)
 p8w = Pawn(id="p8w",type="pawn",symbol="♙",pos=[6, 7],moves=0,color="white",image=constants.white_pawn)
-r1w = Rook(id="r1w",type="rook",symbol="♖",pos=[7, 0],moves=0,color="white",image=constants.white_rook)
-r2w = Rook(id="r2w",type="rook",symbol="♖",pos=[7, 7],moves=0,color="white",image=constants.white_rook)
+r1w = Rook(id="r1w",type="rook",symbol="♖",pos=[7, 7],moves=0,color="white",image=constants.white_rook)
+r2w = Rook(id="r2w",type="rook",symbol="♖",pos=[7, 0],moves=0,color="white",image=constants.white_rook)
 k1w = Knight(id="k1w",type="knight",symbol="♘",pos=[7, 1],moves=0,color="white",image=constants.white_knight)
 k2w = Knight(id="k2w",type="knight",symbol="♘",pos=[7, 6],moves=0,color="white",image=constants.white_knight)
 b1w = Bishop(id="b1w",type="bishop",symbol="♗",pos=[7, 2],moves=0,color="white",image=constants.white_bishop)
@@ -478,49 +640,56 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
             your_pieces.append(q2b)
 
 def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
+
+    taken_piece = None
     opponent_pieces = pieces_black if piece.color == "white" else pieces_white
     direction = -1 if piece.color == "white" else 1
 
     for x, op in enumerate(opponent_pieces):
 
-        if op.pos == piece.pos or [op.pos[0],op.pos[1]] == [piece.pos[0]-direction,piece.pos[1]]:
-            del opponent_pieces[x]
+        if op.pos == piece.pos or ([op.pos[0],op.pos[1]] == [piece.pos[0]-direction,piece.pos[1]] and piece.type == "pawn"):
 
+            print(f" Op is {op.type} and piece is {piece.type}")
+            taken_piece = copy.deepcopy(op)
+            
             match op.type:
                 case "pawn":
                     if op.color == "white":
-                        taken_piece = Pawn(image=constants.white_pawn_tiny) 
+                        taken_piece.image = constants.white_pawn_tiny
                     else:
-                        taken_piece = Pawn(image=constants.black_pawn_tiny)
+                        taken_piece.image = constants.black_pawn_tiny
                     
                 case "rook":
                     if op.color == "white":
-                        taken_piece = Rook(image=constants.white_rook_tiny) 
+                        taken_piece.image = constants.white_rook_tiny
                     else:
-                        taken_piece = Rook(image=constants.black_rook_tiny)
+                        taken_piece.image = constants.black_rook_tiny
                 
                 case "knight":
                     if op.color == "white":
-                        taken_piece = Knight(image=constants.white_knight_tiny) 
+                        taken_piece.image = constants.white_knight_tiny
                     else:
-                        taken_piece = Knight(image=constants.black_knight_tiny)
+                        taken_piece.image = constants.black_knight_tiny
                 
                 case "bishop":
                     if op.color == "white":
-                        taken_piece = Bishop(image=constants.white_bishop_tiny) 
+                        taken_piece.image = constants.white_bishop_tiny
                     else:
-                        taken_piece = Bishop(image=constants.black_bishop_tiny)
+                        taken_piece.image = constants.black_bishop_tiny
                 
                 case "queen":
                     if op.color == "white":
-                        taken_piece = Queen(image=constants.white_queen_tiny) 
+                        taken_piece.image = constants.white_queen_tiny
                     else:
-                        taken_piece = Queen(image=constants.black_queen_tiny)
+                        taken_piece.image = constants.black_queen_tiny
 
-            if op.color == "white":
-                take_list_white.append(taken_piece)
-            else:
-                take_list_black.append(taken_piece)
+            del opponent_pieces[x]
+
+            if taken_piece:
+                if op.color == "white":
+                    take_list_white.append(taken_piece)
+                else:
+                    take_list_black.append(taken_piece)
 
             break
 
@@ -606,7 +775,12 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
 
     #update you_sim with new move
     you_sim = copy.deepcopy(you)
-    moved_piece = [x for x in you_sim if x.id == piece.id][0] # gets object of piece that's moving
+    # print([x.id for x in you_sim])
+    moved_piece = [x for x in you_sim if x.id == piece.id]# gets object of piece that's moving
+    if len(moved_piece) > 0:
+        moved_piece = moved_piece[0]
+    else:
+        return
     moved_piece.pos = [new_row, new_col]
 
     original_col = piece.pos[1]  
@@ -633,13 +807,13 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
 
     if you == pieces_white:
         if king_pos in all_new_moves_opponent_for_check(player=opponent_sim, pieces_white=you_sim, pieces_black=opponent_sim):
-            print("You cant go here because its a check. Try another move. (1)")
+            # print("You cant go here because its a check. Try another move. (1)")
             return True
         else:
             return False
     elif you == pieces_black:
         if king_pos in all_new_moves_opponent_for_check(player=opponent_sim, pieces_white=opponent_sim, pieces_black=you_sim):
-            print("You cant go here because its a check. Try another move. (2)")
+            # print("You cant go here because its a check. Try another move. (2)")
             return True
         else:
         # if king isn't in check next move it can go forward and update the board
@@ -648,18 +822,27 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
 def is_opponent_king_in_check(you, opponent, pieces_white, pieces_black):
     
     # checks if you put your opponent into check
-    opponent_king = [piece for piece in opponent if piece.type == "king"][0]
+    opponent_king = [piece for piece in opponent if piece.type == "king"]
+
+    # incase there isn't an opponent king
+    if len(opponent_king) < 1:
+        return
+    else:
+        opponent_king = opponent_king[0]
+
     king_row = opponent_king.pos[0]
     king_col = opponent_king.pos[1]
     king_pos = [king_row, king_col]
 
     if king_pos in all_new_moves_opponent_for_check(player=you, pieces_white=pieces_white, pieces_black=pieces_black):
-        print("You cant go here because its a check. Try another move. (3)")
+        # print("You cant go here because its a check. Try another move. (3)")
         return True
     else:
         return False
 
 def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
+
+    if "king" not in [a.type for a in opponent]: return
     
     # opponent kings original position
     kings_original_row, kings_original_col = next(a.pos for a in opponent if a.type == "king")
@@ -729,9 +912,9 @@ def is_checkmate_opponent(you, opponent,white_pieces,black_pieces):
                     
     # if the lists length is equal to opponents possible next moves, its checkmate/stalemate, otherwise not
     if len(list_of_trues) == len(opponent_next_moves_passive) and len(opponent_next_moves_passive) > 0:
-        print("checkmate")
+        # print("checkmate")
         return True
-    print("no checkmate detected")
+    # print("no checkmate detected")
     return False
 
 def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
@@ -792,21 +975,19 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                                 x.pos = [row,col]
                                 x.moves+=1
                         
-                        Takes(pieces_white,pieces_black,x,board.taken_list_white,board.taken_list_white)
+                        Takes(pieces_white,pieces_black,x,board.taken_list_white,board.taken_list_black)
                         PawnPromotion(piece=x,row=row,col=col,pieces_white=pieces_white,pieces_black=pieces_black)
 
                         check_ = is_opponent_king_in_check(you=you, opponent=opponent,pieces_white=pieces_white,pieces_black=pieces_black)
                         if check_:
-                            print(f"Check!")
+                            # print(f"Check!")
 
                             checkmate = is_checkmate_opponent(you=you, opponent=opponent,white_pieces=pieces_white,black_pieces=pieces_black)
                             if checkmate:
-                                print("Checkmate!")
                                 return "checkmate"
                         else:
                             stalemate = is_checkmate_opponent(you=you, opponent=opponent,white_pieces=pieces_white,black_pieces=pieces_black)
                             if stalemate:
-                                print("Stalemate!")
                                 return "stalemate"
 
                         return True

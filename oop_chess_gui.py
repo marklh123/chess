@@ -1,8 +1,10 @@
 import pygame  
 from pygame.locals import *
-from oop_chess_backend import pieces_white, pieces_black, is_your_king_in_check, Castling, Takes, PawnPromotion \
-    , is_opponent_king_in_check, is_checkmate_opponent
+from oop_chess_backend import is_your_king_in_check, Castling, Takes, PawnPromotion \
+    , is_opponent_king_in_check, is_checkmate_opponent, pieces_white,pieces_black
 
+
+# from oop_chess_tests import pieces_white, pieces_black
 
 pygame.init()
 pygame.display.set_caption("Chess V2")
@@ -83,6 +85,7 @@ class App:
 
         # second click: check if move valid
         else:
+            print("Second click!")
             # see if target position is valid first
             target = [self.clicked_row, self.clicked_col]
             clicked_row_two, clicked_col_two = self.clicked_row, self.clicked_col
@@ -169,8 +172,6 @@ class App:
                         constants.checkmate_sound.play()
                     else:
                         constants.check_sound.play()
-
-                        
                 
                 elif not check_:
                     self.stalemate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
@@ -211,6 +212,8 @@ class App:
             self._running = False
         elif event.type == MOUSEBUTTONDOWN:
             x,y = event.pos
+
+            print(pixel_to_board(x,y))
             
             # title screen button areas, select gamemode
             if self.pre_game:
@@ -242,14 +245,12 @@ class App:
         if not self.pre_game:
             self.screen.blit(constants.surface_turn_background, (0,0))
             self.screen.blit(constants.board_surface, (0, 0))
-            # self.screen.blit(constants.taken_pieces, (800,0))
 
             # highlight squares for players move
             if self.selected_piece and not self.pve or (self.pve and self.you == pieces_white):
                 for move in self.available_moves:
 
-                    # highlight available squares in yellow
-                    
+                    # highlight available squares in animated yellow
                     px = pos_to_pixel[move[1]]
                     py = pos_to_pixel[move[0]]
 
