@@ -55,59 +55,8 @@ class Board:
                 # if kings in check and move doesn't save king, skip it
                 check_ = is_your_king_in_check(you, opp, piece, move[0], move[1], self.pieces_white,self.pieces_black)
                 if check_: continue 
-                            
-                # # normal move
-                # if ((piece.type != 'king') or
-                #         (piece.moves != 0)):
-    
-                #     valid_move = True
-                
-                # # check for castling
-                # elif piece.type == 'king' and piece.moves == 0:
-                #     king_row = piece.pos[0] 
-                #     king_col = piece.pos[1]  
-    
-                #     result = Castling(
-                #         self.pieces_black, 
-                #         self.pieces_white,
-                #         king_row,  # king's current row
-                #         king_col,  # king's current col letter
-                #         move[0],  # destination col letter
-                #         move[1],  # destination row
-                #         you  # your color
-                #     )
-    
-                #     # if castling didn't fail its a valid move
-                #     if result != "cancel castling":
-                #         valid_move = True
-                        
-                # move the piece
-    
-                you_sim = copy.deepcopy(you)
-                piece_to_change = [piece_sim for piece_sim in you_sim if piece_sim.pos == piece.pos][0]
-                piece_to_change.pos = move
-
-                check_ = is_opponent_king_in_check(you_sim, opp, self.pieces_white, self.pieces_black)
-                if check_:
-    
-                    checkmate = is_checkmate_opponent(you_sim, opp, self.pieces_white, self.pieces_black)
-    
-                    if checkmate:
-                        moves.append([piece.pos,move])
-                        continue
-                    else:
-                        moves.append([piece.pos,move])
-                        continue
-                
-                elif not check_:
-                    stalemate = is_checkmate_opponent(you_sim,opp,pieces_white,pieces_black)
-    
-                    if stalemate:
-                        moves.append([piece.pos,move])
-                        continue
                 
                 moves.append([piece.pos,move])
-                continue
 
         return moves
 
@@ -118,7 +67,7 @@ class Board:
         # if the piece isn't found in white or black
         if starting_pos not in [piece.pos for piece in self.pieces_white+self.pieces_black]:
             print("PROBLEM: this starting position isnt found for make move")
-            return 
+            return
 
         # find the selected piece from its position
         for piece in self.pieces_white:
@@ -129,7 +78,7 @@ class Board:
             if starting_pos == piece.pos:
                 selected_piece = piece
                 you = self.pieces_black
-
+    
         # normal move
         if ((selected_piece.type != 'king') or
                 (selected_piece.moves != 0)):
@@ -146,8 +95,8 @@ class Board:
                 self.pieces_white,
                 king_row,  # king's current row
                 king_col,  # king's current col letter
-                ending_pos[0],  # destination col letter
-                ending_pos[1],  # destination row
+                ending_pos[1],  # destination col letter
+                ending_pos[0],  # destination row
                 you  # your color
             )
 
@@ -155,18 +104,21 @@ class Board:
             if result != "cancel castling":
                 valid_move = True
 
-        # move the selected piece to legal move
+            if result == "done castling":
+                print("TS is castling")
+
+        # if the move is valid then move, look for takes, and change turns
         if valid_move:
             selected_piece.pos = ending_pos
             selected_piece.moves += 1
 
-        # check if move took any pieces
-        Takes(self.pieces_white,self.pieces_black,selected_piece,self.taken_list_white,self.taken_list_black)
+            # check if move took any pieces
+            last_taken_piece = Takes(self.pieces_white,self.pieces_black,selected_piece,self.taken_list_white,self.taken_list_black)
 
-        self.change_turns()
-        return starting_pos, ending_pos
+            self.change_turns()
+        return starting_pos, ending_pos, last_taken_piece, valid_move
 
-    def undo_move(self, starting_pos, ending_pos):
+    def undo_move(self, starting_pos, ending_pos,taken_piece):
         selected_piece = None
                 
         # if new moves positon isn't one of the pieces
@@ -178,6 +130,7 @@ class Board:
             print(f"White: {[(index_letter[piece.pos[1]],8-(piece.pos[0])) for piece in self.pieces_white]}")
             return
 
+        # get the piece from the new moved position
         for piece in self.pieces_white:
             if ending_pos == piece.pos:
                 selected_piece = piece
@@ -185,18 +138,21 @@ class Board:
             if ending_pos == piece.pos:
                 selected_piece = piece
 
+        # undo moved piece 
         selected_piece.pos = starting_pos
         selected_piece.moves -= 1
 
-        if selected_piece.color == "white":
-            for piece in self.taken_list_black:
-                self.pieces_black.append(piece)
-                self.taken_list_black.remove(piece)
-        elif selected_piece.color == "black":
-            for piece in self.taken_list_white:
-                self.pieces_white.append(piece)
-                self.taken_list_white.remove(piece)
-                        
+        # undo takes
+        if taken_piece:
+            if selected_piece.color == "white":
+                if taken_piece.color == "black":
+                    self.pieces_black.append(taken_piece)
+
+            elif selected_piece.color == "black":
+                if taken_piece.color == "white":
+                    self.pieces_white.append(taken_piece)
+
+
         self.change_turns()
     
 class Piece():
@@ -691,7 +647,7 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
                 else:
                     take_list_black.append(taken_piece)
 
-            break
+            return op
 
 def Castling(black, white, xx, col, new_col, new_row, your_color):
 

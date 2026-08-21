@@ -178,7 +178,7 @@ def perft(board, depth):
         #     print(f"white plays {index_letter[move[0][1]]}{8-(move[0][0])} to {index_letter[move[1][1]]}{8-(move[1][0])}")
 
         # print(f"move is {move} and type is {type(move)}")
-        starting_pos, ending_pos = board.make_move(move[0],move[1]) # move the piece and give starting and ending positions for it
+        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(move[0],move[1]) # move the piece and give starting and ending positions for it
 
         # if depth == 1:
         #     print(f"{index_letter[starting_pos[1]]}{8-starting_pos[0]} to {index_letter[ending_pos[1]]}{8-(ending_pos[0])}")
@@ -188,7 +188,9 @@ def perft(board, depth):
         #     print("Nodes to add: ", nodes_to_add)
         nodes += nodes_to_add
 
-        board.undo_move(starting_pos,ending_pos)
+        # only undo move if it moved
+        if valid_move:
+            board.undo_move(starting_pos,ending_pos, last_taken_pieces)
 
         
     return nodes
@@ -203,17 +205,19 @@ def perft_divide(board, depth):
     
     for move in legal_moves:
 
-        starting_pos, ending_pos = board.make_move(move[0],move[1]) 
+        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(move[0],move[1]) 
 
         nodes = perft(board, depth - 1)
         total_nodes += nodes
 
-        board.undo_move(starting_pos, ending_pos)
+        # only undo move if it moved
+        if valid_move:
+            board.undo_move(starting_pos, ending_pos, last_taken_pieces)
 
         print(f"{index_letter[move[0][1]]}{8-(move[0][0])} to {index_letter[move[1][1]]}{8-(move[1][0])}: {nodes}")
         
     print(f"\nTotal Leaf Nodes: {total_nodes}")
 
 
-perft_divide(board1,4)
+perft_divide(board1,5)
 
