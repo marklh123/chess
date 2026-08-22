@@ -198,7 +198,7 @@ def perft(board, depth):
 # amount of possible end positions for each first move
 def perft_divide(board, depth):
     if depth == 0:
-        return
+        return 
     
     total_nodes = 0
     legal_moves = board.get_moves()

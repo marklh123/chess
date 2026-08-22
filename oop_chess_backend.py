@@ -18,6 +18,7 @@ class Board:
         self.taken_list_white = []
         self.taken_list_black = []
         self.captured_pieces_history = {"w":self.taken_list_black,"b":self.taken_list_white}
+        self.pawn_double_move = None
 
     def board_print(self):
 
@@ -49,7 +50,7 @@ class Board:
         moves = []
 
         for piece in you:
-            piece_moves = piece.rule(self.pieces_white,self.pieces_black,False) if piece.type == "pawn" else piece.rule(self.pieces_white,self.pieces_black)
+            piece_moves = piece.rule(self.pieces_white,self.pieces_black,self.pawn_double_move) if piece.type == "pawn" else piece.rule(self.pieces_white,self.pieces_black)
             for move in piece_moves:
 
                 # if kings in check and move doesn't save king, skip it
@@ -109,6 +110,13 @@ class Board:
 
         # if the move is valid then move, look for takes, and change turns
         if valid_move:
+
+            # check if the move was a double pawn move
+            if selected_piece.type == "pawn" and abs(ending_pos[0] - selected_piece.pos[0]) == 2:
+                self.pawn_double_move = selected_piece
+            else:
+                self.pawn_double_move = None
+
             selected_piece.pos = ending_pos
             selected_piece.moves += 1
 
@@ -201,10 +209,10 @@ class Pawn(Piece):
                 ([op_row, op_col] == [row + direction, col - 1])):
                 takes.append([op_row, op_col])
 
-            # en passant
-            if pawn_double_move and ([op_row,op_col] == [row, col+1] or
-                                    [op_row,op_col] == [row, col-1]):
-                takes.append([op_row+direction,op_col]) 
+        # en passant, check if opponents pawn that just moved twice is in en passant range
+        if pawn_double_move and (pawn_double_move.pos == [row, col+1] or
+                                pawn_double_move.pos == [row, col-1]):
+            takes.append([pawn_double_move.pos[0]+direction,pawn_double_move.pos[1]]) 
         
         return takes
     
@@ -519,7 +527,7 @@ pieces_white = [p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,r1w,r2w,b1w,b2w,k1w,k2w,kingw,qw
 pieces_black = [p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,r1b,r2b,b1b,b2b,k1b,k2b,qb,kingb]
 
 board = Board(pieces_white,pieces_black)
-pawn_double_move = False
+pawn_double_move = None
 
 def main():
     
@@ -601,11 +609,12 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
     opponent_pieces = pieces_black if piece.color == "white" else pieces_white
     direction = -1 if piece.color == "white" else 1
 
+    # check for regular takes
     for x, op in enumerate(opponent_pieces):
 
-        if op.pos == piece.pos or ([op.pos[0],op.pos[1]] == [piece.pos[0]-direction,piece.pos[1]] and piece.type == "pawn"):
+        if op.pos == piece.pos:
 
-            print(f" Op is {op.type} and piece is {piece.type}")
+            # print(f" Op is {op.type} and piece is {piece.type}")
             taken_piece = copy.deepcopy(op)
             
             match op.type:
@@ -648,6 +657,53 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
                     take_list_black.append(taken_piece)
 
             return op
+
+    # check for en passant takes (after regular takes)
+    for x, op in enumerate(opponent_pieces):
+        if [op.pos[0],op.pos[1]] == [piece.pos[0]-direction,piece.pos[1]] and piece.type == "pawn":
+            taken_piece = copy.deepcopy(op)
+                        
+            match op.type:
+                case "pawn":
+                    if op.color == "white":
+                        taken_piece.image = constants.white_pawn_tiny
+                    else:
+                        taken_piece.image = constants.black_pawn_tiny
+                    
+                case "rook":
+                    if op.color == "white":
+                        taken_piece.image = constants.white_rook_tiny
+                    else:
+                        taken_piece.image = constants.black_rook_tiny
+                
+                case "knight":
+                    if op.color == "white":
+                        taken_piece.image = constants.white_knight_tiny
+                    else:
+                        taken_piece.image = constants.black_knight_tiny
+                
+                case "bishop":
+                    if op.color == "white":
+                        taken_piece.image = constants.white_bishop_tiny
+                    else:
+                        taken_piece.image = constants.black_bishop_tiny
+                
+                case "queen":
+                    if op.color == "white":
+                        taken_piece.image = constants.white_queen_tiny
+                    else:
+                        taken_piece.image = constants.black_queen_tiny
+
+            del opponent_pieces[x]
+
+            if taken_piece:
+                if op.color == "white":
+                    take_list_white.append(taken_piece)
+                else:
+                    take_list_black.append(taken_piece)
+
+            return op
+
 
 def Castling(black, white, xx, col, new_col, new_row, your_color):
 
