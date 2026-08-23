@@ -219,5 +219,5 @@ def perft_divide(board, depth):
     print(f"\nTotal Leaf Nodes: {total_nodes}")
 
 
-perft_divide(board1,5)
+perft_divide(board1,6)
 

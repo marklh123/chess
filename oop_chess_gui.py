@@ -52,7 +52,7 @@ class App:
         self.taken_pieces_white = []
         self.taken_pieces_black = []
         self.pve = False
-        self.pawn_double_move = False
+        self.pawn_double_move = None
 
     def set_player_and_opp(self):
         self.you = pieces_white if self.active_player_index == 0 else pieces_black
@@ -138,9 +138,9 @@ class App:
                     if self.selected_piece.type == "pawn" and abs(clicked_row_two - self.selected_piece.pos[0]) == 2:
                         print("Double move!!!")
         
-                        self.pawn_double_move = True
+                        self.pawn_double_move = self.selected_piece
                     else:
-                        self.pawn_double_move = False
+                        self.pawn_double_move = None
 
                     print(f"Inital pos: {self.selected_piece.pos[0]},{self.selected_piece.pos[1]}")
                     print(f"New pos: {clicked_row_two},{clicked_col_two}")

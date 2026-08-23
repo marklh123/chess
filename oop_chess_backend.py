@@ -770,6 +770,21 @@ def all_new_moves_opponent_for_check(player, pieces_white, pieces_black):
 
     return all_new_moves_your_color
 
+# better version of this function, return as soon as a check is found instead of finding every single possible move first
+def all_new_moves_opponent_for_check_test(opp, pieces_white, pieces_black, king_pos):
+
+    for i in opp:
+        if i.type == "pawn":
+            moves = i.rule_pawn_takes(pieces_white,pieces_black,False)
+        else:
+            moves = i.rule(pieces_white,pieces_black)
+
+        if king_pos in moves:
+            return True
+
+    return False
+
+    
 def castling_check(new_col, original_col, new_row, you_sim):
     # updates rooks position if castled
     if new_col > original_col:
@@ -818,12 +833,10 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
 
     # check if your kings pos is in opp check
     if you == pieces_white:
-        if king_pos in all_new_moves_opponent_for_check(player=opponent, pieces_white=you, pieces_black=opponent):
-            is_king_in_check = True
+        is_king_in_check = all_new_moves_opponent_for_check_test(opp=opponent, pieces_white=you, pieces_black=opponent, king_pos=king_pos)
     elif you == pieces_black:
-        if king_pos in all_new_moves_opponent_for_check(player=opponent, pieces_white=opponent, pieces_black=you):
-            is_king_in_check = True
-        
+        is_king_in_check = all_new_moves_opponent_for_check_test(opp=opponent, pieces_white=opponent, pieces_black=you, king_pos=king_pos)
+
     # reset moved piece
     piece.pos = original_pos 
 
@@ -838,12 +851,6 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
         opponent.append(captured_piece)
 
     return is_king_in_check
-
-
-    
-
-
-
 
 def is_opponent_king_in_check(you, opponent, pieces_white, pieces_black):
     
