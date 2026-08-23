@@ -189,7 +189,7 @@ class Piece():
 class Pawn(Piece):  
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol,image)
-    def rule_pawn_takes(self,pieces_white,pieces_black,pawn_double_move):
+    def rule_pawn_takes(self,pieces_white,pieces_black,pawn_double_move,look_for_check=None):
         if self.color == "white":
             direction = -1
             op_pieces = pieces_black
@@ -207,14 +207,26 @@ class Pawn(Piece):
 
             if (([op_row, op_col] == [row + direction, col + 1]) or
                 ([op_row, op_col] == [row + direction, col - 1])):
+
+                if look_for_check and [op_row, op_col] == look_for_check:
+                    return True
+                    
                 takes.append([op_row, op_col])
 
         # en passant, check if opponents pawn that just moved twice is in en passant range
         if pawn_double_move and (pawn_double_move.pos == [row, col+1] or
                                 pawn_double_move.pos == [row, col-1]):
-            takes.append([pawn_double_move.pos[0]+direction,pawn_double_move.pos[1]]) 
+
         
-        return takes
+            if look_for_check and ([row, col+1] == look_for_check or [row, col] == look_for_check):
+                return True
+            
+            takes.append([pawn_double_move.pos[0]+direction,pawn_double_move.pos[1]]) 
+
+        if look_for_check:
+            return False
+        else:
+            return takes
     
     def rule(self,pieces_white,pieces_black,pawn_double_move):
 
@@ -259,7 +271,7 @@ class Pawn(Piece):
 class Knight(Piece):
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id,symbol, image)
-    def rule(self,pieces_white,pieces_black):
+    def rule(self,pieces_white,pieces_black,look_for_check=None):
         row, col = self.pos
 
         new_moves = [(-2,1),(-2,-1),(2,1),(2,-1),(1,-2),(-1,-2),(1,2),(-1,2)]
@@ -281,22 +293,23 @@ class Knight(Piece):
             elif temp_col < 0 or temp_col > 7:
                 continue
 
+            # cant take your own color
             if any(p.pos == [temp_row, temp_col] for p in your_color):
                 continue
 
-            if any(p.pos == [temp_row, temp_col] for p in opponent_color):
-                new_pos.append([temp_row, temp_col])
-                continue
-
+            if look_for_check and [temp_row, temp_col] == look_for_check:
+                return True
+            
             new_pos.append([temp_row, temp_col])
 
-        # continue → SKIP this iteration, keep looping
-
-        return new_pos
+        if look_for_check:
+            return False
+        else:
+            return new_pos
 class Bishop(Piece):
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id,symbol, image)
-    def rule(self,pieces_white,pieces_black):
+    def rule(self,pieces_white,pieces_black,look_for_check=None):
 
         row, col = self.pos
         
@@ -326,17 +339,24 @@ class Bishop(Piece):
                 if any(p.pos == [r, c] for p in your_color):
                     break
 
-                if any(p.pos == [r, c] for p in opponent_color):
+                elif any(p.pos == [r, c] for p in opponent_color):
                     new_pos.append([r, c])
+
+                    if look_for_check and [r, c] == look_for_check:
+                        return True
+
                     break
 
                 new_pos.append([r, c])
 
-        return new_pos
+        if look_for_check:
+            return False
+        else:
+            return new_pos
 class Rook(Piece):
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id,symbol, image)
-    def rule(self,pieces_white,pieces_black):
+    def rule(self,pieces_white,pieces_black,look_for_check=None):
         row, col = self.pos
 
         if self.color == "white":
@@ -345,7 +365,6 @@ class Rook(Piece):
         else:
             your_color = pieces_black
             opponent_color = pieces_white
-
 
         new_pos = []
 
@@ -369,16 +388,22 @@ class Rook(Piece):
 
                 elif any(p.pos == [r, c] for p in opponent_color):
                     new_pos.append([r, c])
+                    if look_for_check and [r, c] == look_for_check:
+                        return True
                     break
-                
+
+
                 new_pos.append([r, c])
 
-        return new_pos
+        if look_for_check:
+            return False
+        else:
+            return new_pos
 class Queen(Piece):
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol, image)
     
-    def rule(self,pieces_white,pieces_black):
+    def rule(self,pieces_white,pieces_black,look_for_check=None):
         row, col = self.pos
 
         if self.color == "white":
@@ -408,13 +433,18 @@ class Queen(Piece):
                 if any(p.pos == [r, c] for p in your_color):
                     break
 
-                if any(p.pos == [r, c] for p in opponent_color):
+                elif any(p.pos == [r, c] for p in opponent_color):
                     new_pos.append([r, c])
+                    if look_for_check and [r, c] == look_for_check:
+                        return True
                     break
 
                 new_pos.append([r, c])
 
-        return new_pos
+        if look_for_check:
+            return False
+        else:
+            return new_pos
 class King(Piece):
     def __init__(self, color=None, type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol, image)
@@ -774,13 +804,13 @@ def all_new_moves_opponent_for_check(player, pieces_white, pieces_black):
 def all_new_moves_opponent_for_check_test(opp, pieces_white, pieces_black, king_pos):
 
     for i in opp:
-        if i.type == "pawn":
-            moves = i.rule_pawn_takes(pieces_white,pieces_black,False)
-        else:
-            moves = i.rule(pieces_white,pieces_black)
 
-        if king_pos in moves:
-            return True
+        if i.type == "pawn": 
+            if i.rule_pawn_takes(pieces_white,pieces_black,False,king_pos):
+                return True
+        elif i.type != "king":
+            if i.rule(pieces_white,pieces_black,king_pos):
+                return True
 
     return False
 
