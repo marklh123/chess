@@ -58,7 +58,7 @@ class Board:
                 if check_: continue 
                 
                 moves.append([piece.pos,move])
-
+                
         return moves
 
     def make_move(self, starting_pos, ending_pos):
@@ -615,7 +615,7 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
         if op.pos == piece.pos:
 
             # print(f" Op is {op.type} and piece is {piece.type}")
-            taken_piece = copy.deepcopy(op)
+            taken_piece = op
             
             match op.type:
                 case "pawn":
@@ -661,7 +661,7 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
     # check for en passant takes (after regular takes)
     for x, op in enumerate(opponent_pieces):
         if [op.pos[0],op.pos[1]] == [piece.pos[0]-direction,piece.pos[1]] and piece.type == "pawn":
-            taken_piece = copy.deepcopy(op)
+            taken_piece = op
                         
             match op.type:
                 case "pawn":
@@ -781,56 +781,70 @@ def castling_check(new_col, original_col, new_row, you_sim):
     for p in you_sim:
             if p.pos == rook_from and p.type == "rook":
                 p.pos = rook_to
-                break
+                
+                return rook_from, rook_to
+    return False, False
 
 def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, pieces_black):
 
-    #update you_sim with new move
-    you_sim = copy.deepcopy(you)
-    # print([x.id for x in you_sim])
-    moved_piece = [x for x in you_sim if x.id == piece.id]# gets object of piece that's moving
-    if len(moved_piece) > 0:
-        moved_piece = moved_piece[0]
-    else:
-        return
-    moved_piece.pos = [new_row, new_col]
+    # what gets returned at the end
+    is_king_in_check = False
+    rook_to, rook_from = False, False
 
-    original_col = piece.pos[1]  
+    # track original piece pos 
+    original_col = piece.pos[1]
+    original_pos = piece.pos
+
+    moved_piece = piece
+    moved_piece.pos = [new_row,new_col]
+
+    # castling, track original rook pos
     king_moved_two = piece.type == "king" and abs(new_col - original_col) == 2
-
-    # castling detection, update rook pos before making copies if king castled
     if king_moved_two:
-        castling_check(new_col=new_col,original_col=original_col,new_row=new_row,you_sim=you_sim)
+        rook_from,rook_to = castling_check(new_col=new_col,original_col=original_col,new_row=new_row,you_sim=you)
 
-    #if new move is take, remove the captured piece from opponent
-    opponent_sim = copy.deepcopy(opponent)
+    # if new move is take, temporarily remove the captured piece from opponent
     captured_piece = None
-    for piece in opponent_sim:
-        if piece.pos == moved_piece.pos:
-            captured_piece = piece
+    for piece_op in opponent:
+        if piece_op.pos == moved_piece.pos:
+            captured_piece = piece_op
             break
     if captured_piece:
-        opponent_sim.remove(captured_piece)
+        opponent.remove(captured_piece)
 
-    your_king = [piece for piece in you_sim if piece.type == "king"][0]
-    king_row = your_king.pos[0]
-    king_col = your_king.pos[1]
-    king_pos = [king_row, king_col]
+    # find your king and its pos in you sim
+    your_king = [piece for piece in you if piece.type == "king"][0]
+    king_pos = your_king.pos
 
+    # check if your kings pos is in opp check
     if you == pieces_white:
-        if king_pos in all_new_moves_opponent_for_check(player=opponent_sim, pieces_white=you_sim, pieces_black=opponent_sim):
-            # print("You cant go here because its a check. Try another move. (1)")
-            return True
-        else:
-            return False
+        if king_pos in all_new_moves_opponent_for_check(player=opponent, pieces_white=you, pieces_black=opponent):
+            is_king_in_check = True
     elif you == pieces_black:
-        if king_pos in all_new_moves_opponent_for_check(player=opponent_sim, pieces_white=opponent_sim, pieces_black=you_sim):
-            # print("You cant go here because its a check. Try another move. (2)")
-            return True
-        else:
-        # if king isn't in check next move it can go forward and update the board
-            return False
+        if king_pos in all_new_moves_opponent_for_check(player=opponent, pieces_white=opponent, pieces_black=you):
+            is_king_in_check = True
+        
+    # reset moved piece
+    piece.pos = original_pos 
+
+    # reset rook if castled
+    if rook_to and rook_from:
+        for rook in you:
+            if rook.pos == rook_to:
+                rook.pos = rook_from
+
+    # reset takes if any
+    if captured_piece:
+        opponent.append(captured_piece)
+
+    return is_king_in_check
+
+
     
+
+
+
+
 def is_opponent_king_in_check(you, opponent, pieces_white, pieces_black):
     
     # checks if you put your opponent into check
