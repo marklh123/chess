@@ -8,6 +8,25 @@ index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 # white bishops sometimes can't take black pieces on blacks back rank, doesn't take and image disapears on the same square, 
 # white queen too
 
+def init_board_table(pieces_white,pieces_black):
+    for x in pieces_white + pieces_black:
+                        row = x.pos[0]
+                        col = x.pos[1]
+                        board_table[row][col] = x
+
+board_table = [["_" for _ in range(8)] for _ in range(8)]
+
+def print_board_data_table(board_data):
+        for x in reversed(board_data):
+            list_to_print = []
+            for piece in x:
+                try:
+                    symbol = " "+piece.symbol+" "
+                except:
+                    symbol = " _ "
+                list_to_print.append(symbol)
+
+            # print(list_to_print)
 
 class Board:
     def __init__(self,pieces_white,pieces_black):
@@ -17,18 +36,16 @@ class Board:
         self.pieces_black = pieces_black
         self.taken_list_white = []
         self.taken_list_black = []
-        self.captured_pieces_history = {"w":self.taken_list_black,"b":self.taken_list_white}
         self.pawn_double_move = None
+
+        init_board_table(self.pieces_white,self.pieces_black)   
 
     def board_print(self):
 
         # reset board state
         self.board_data = [["_" for _ in range(8)] for _ in range(8)]
 
-        for x in self.pieces_white + self.pieces_black:
-            row = x.pos[0]
-            col = x.pos[1]
-            self.board_data[row][col] = x.symbol
+        self.set_board_data_table()
 
         print("    a   b   c   d   e   f   g   h")
         if self.active_player_index == 0:
@@ -52,34 +69,26 @@ class Board:
         for piece in you:
             piece_moves = piece.rule(self.pieces_white,self.pieces_black,self.pawn_double_move) if piece.type == "pawn" else piece.rule(self.pieces_white,self.pieces_black)
             for move in piece_moves:
-
                 # if kings in check and move doesn't save king, skip it
-                check_ = is_your_king_in_check(you, opp, piece, move[0], move[1], self.pieces_white,self.pieces_black)
+                check_ = is_your_king_in_check(you, opp, piece, move[0], move[1], self.pieces_white,self.pieces_black,self.pawn_double_move)
                 if check_: continue 
                 
-                moves.append([piece.pos,move])
+                moves.append([piece,piece.pos,move])
+                # print(f"pos: {piece.pos} symbol: {piece.symbol} color: {piece.color}")
+                # print_board_data_table(board_table)
                 
         return moves
 
-    def make_move(self, starting_pos, ending_pos):
-        selected_piece = None
+    def make_move(self, selected_piece, starting_pos, ending_pos):
+        # selected_piece = None
         valid_move = False
+        you = self.pieces_white if selected_piece.color == "white" else self.pieces_black
         
         # if the piece isn't found in white or black
         if starting_pos not in [piece.pos for piece in self.pieces_white+self.pieces_black]:
             print("PROBLEM: this starting position isnt found for make move")
             return
 
-        # find the selected piece from its position
-        for piece in self.pieces_white:
-            if starting_pos == piece.pos:
-                selected_piece = piece
-                you = self.pieces_white
-        for piece in self.pieces_black:
-            if starting_pos == piece.pos:
-                selected_piece = piece
-                you = self.pieces_black
-    
         # normal move
         if ((selected_piece.type != 'king') or
                 (selected_piece.moves != 0)):
@@ -117,8 +126,10 @@ class Board:
             else:
                 self.pawn_double_move = None
 
+            board_table[selected_piece.pos[0]][selected_piece.pos[1]] = "_"
             selected_piece.pos = ending_pos
             selected_piece.moves += 1
+            board_table[selected_piece.pos[0]][selected_piece.pos[1]] = selected_piece
 
             # check if move took any pieces
             last_taken_piece = Takes(self.pieces_white,self.pieces_black,selected_piece,self.taken_list_white,self.taken_list_black)
@@ -147,8 +158,11 @@ class Board:
                 selected_piece = piece
 
         # undo moved piece 
+        board_table[selected_piece.pos[0]][selected_piece.pos[1]] = "_"
         selected_piece.pos = starting_pos
         selected_piece.moves -= 1
+        board_table[selected_piece.pos[0]][selected_piece.pos[1]] = selected_piece
+
 
         # undo takes
         if taken_piece:
@@ -159,6 +173,8 @@ class Board:
             elif selected_piece.color == "black":
                 if taken_piece.color == "white":
                     self.pieces_white.append(taken_piece)
+
+            board_table[taken_piece.pos[0]][taken_piece.pos[1]] = taken_piece
 
 
         self.change_turns()
@@ -316,9 +332,12 @@ class Bishop(Piece):
         if self.color == 'white':
             your_color = pieces_white
             opponent_color = pieces_black
+            opp_color = "black"
         else:
             your_color =  pieces_black
             opponent_color = pieces_white
+            opp_color = "white"
+
         new_pos = []
 
         directions = [(1, 1), (-1, 1), (1,-1), (-1, -1)]
@@ -326,6 +345,12 @@ class Bishop(Piece):
         for dr, dc in directions:
             r = row
             c = col
+
+            piece_on_table = board_table[r][c]
+            # try:
+            #     print(f" piece on table: {piece_on_table.symbol}")
+            # except:
+            #     print(f" piece on table: {piece_on_table}")
 
             while True:
                 r += dr
@@ -336,18 +361,29 @@ class Bishop(Piece):
                 if r < 0 or r > 7:
                     break
 
-                if any(p.pos == [r, c] for p in your_color):
+                occupant = board_table[r][c]
+                # try:
+                #     print(f" occupant on table: {occupant.symbol} pos: [{r}][{c}]")
+                # except:
+                #     print(f" occupant on table: {occupant} pos: [{r}][{c}] ")
+
+                # your color
+                if occupant != "_" and occupant.color == self.color:
                     break
 
-                elif any(p.pos == [r, c] for p in opponent_color):
+                # opp color
+                elif occupant != "_" and occupant.color == opp_color:
                     new_pos.append([r, c])
+                    # print(f"Valid move!")
 
                     if look_for_check and [r, c] == look_for_check:
                         return True
-
+                    
                     break
+                
 
                 new_pos.append([r, c])
+                # print(f"Valid move!")
 
         if look_for_check:
             return False
@@ -362,9 +398,11 @@ class Rook(Piece):
         if self.color == "white":
             your_color = pieces_white
             opponent_color = pieces_black
+            opp_color = "black"
         else:
             your_color = pieces_black
             opponent_color = pieces_white
+            opp_color = "white"
 
         new_pos = []
 
@@ -383,13 +421,24 @@ class Rook(Piece):
                 if r < 0 or r > 7:
                     break
 
-                if any(p.pos == [r, c] for p in your_color):
+                occupant = board_table[r][c]
+                # try:
+                #     print(f" occupant on table: {occupant.symbol} pos: [{r}][{c}]")
+                # except:
+                #     print(f" occupant on table: {occupant} pos: [{r}][{c}] ")
+
+                # your color
+                if occupant != "_" and occupant.color == self.color:
                     break
 
-                elif any(p.pos == [r, c] for p in opponent_color):
+                # opp color
+                elif occupant != "_" and occupant.color == opp_color:
                     new_pos.append([r, c])
+                    # print(f"Valid move!")
+
                     if look_for_check and [r, c] == look_for_check:
                         return True
+                    
                     break
 
 
@@ -409,9 +458,11 @@ class Queen(Piece):
         if self.color == "white":
             your_color = pieces_white
             opponent_color = pieces_black
+            opp_color = "black"
         else:
             your_color = pieces_black
             opponent_color = pieces_white
+            opp_color = "white"
 
         new_pos = []
 
@@ -430,13 +481,20 @@ class Queen(Piece):
                 if r < 0 or r > 7:
                     break
 
-                if any(p.pos == [r, c] for p in your_color):
+                occupant = board_table[r][c]
+
+                # your color
+                if occupant != "_" and occupant.color == self.color:
                     break
 
-                elif any(p.pos == [r, c] for p in opponent_color):
+                # opp color
+                elif occupant != "_" and occupant.color == opp_color:
                     new_pos.append([r, c])
+                    # print(f"Valid move!")
+
                     if look_for_check and [r, c] == look_for_check:
                         return True
+                    
                     break
 
                 new_pos.append([r, c])
@@ -625,6 +683,8 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
             del your_pieces[x]
             q2w = Queen(color="white",type="queen",moves=0,id="q2w",symbol="♕",pos=[row, col],image=constants.white_queen)
             your_pieces.append(q2w)
+            board_table[row][col] = q2w
+
 
     elif piece.color == "black" and piece.type == "pawn":
         if (row, col) in whitebackranks:
@@ -632,6 +692,8 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
             del your_pieces[x]
             q2b= Queen(color="black",type="queen",moves=0,id="q2b",symbol="♛",pos=[row, col],image=constants.black_queen)
             your_pieces.append(q2b)
+            board_table[row][col] = q2b
+            
 
 def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
 
@@ -679,6 +741,7 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
                         taken_piece.image = constants.black_queen_tiny
 
             del opponent_pieces[x]
+            board_table[op.pos[0]][op.pos[1]] = piece
 
             if taken_piece:
                 if op.color == "white":
@@ -725,6 +788,7 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
                         taken_piece.image = constants.black_queen_tiny
 
             del opponent_pieces[x]
+            board_table[op.pos[0]][op.pos[1]] = "_"
 
             if taken_piece:
                 if op.color == "white":
@@ -830,18 +894,24 @@ def castling_check(new_col, original_col, new_row, you_sim):
                 return rook_from, rook_to
     return False, False
 
-def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, pieces_black):
+def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, pieces_black, pawn_double_move):
+    direction = -1 if piece.color == "white" else 1
+
+    destination_occupant = board_table[new_row][new_col]
 
     # what gets returned at the end
     is_king_in_check = False
     rook_to, rook_from = False, False
 
     # track original piece pos 
+    original_row = piece.pos[0]
     original_col = piece.pos[1]
     original_pos = piece.pos
+    board_table[original_row][original_col] = "_"
 
     moved_piece = piece
     moved_piece.pos = [new_row,new_col]
+    board_table[new_row][new_col] = moved_piece
 
     # castling, track original rook pos
     king_moved_two = piece.type == "king" and abs(new_col - original_col) == 2
@@ -854,8 +924,20 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
         if piece_op.pos == moved_piece.pos:
             captured_piece = piece_op
             break
+
+    # en passant
+    # must be a pawn
+    if moved_piece.type == "pawn": # must be a pawn
+        if pawn_double_move: # opponent must've just had a double move
+            if (pawn_double_move.pos == [original_row, original_col+1]
+                and (new_row == original_row + direction and new_col - original_col == 1)) or (pawn_double_move.pos == [original_row, original_col-1] and (new_row == original_row + direction and new_col - original_col == - 1)):
+                if destination_occupant == "_":
+                    captured_piece = pawn_double_move
+                    board_table[captured_piece.pos[0]][captured_piece.pos[1]] = "_"
+        
     if captured_piece:
         opponent.remove(captured_piece)
+
 
     # find your king and its pos in you sim
     your_king = [piece for piece in you if piece.type == "king"][0]
@@ -868,17 +950,21 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
         is_king_in_check = all_new_moves_opponent_for_check_test(opp=opponent, pieces_white=opponent, pieces_black=you, king_pos=king_pos)
 
     # reset moved piece
+    board_table[moved_piece.pos[0]][moved_piece.pos[1]] = "_"
     piece.pos = original_pos 
+    board_table[original_pos[0]][original_pos[1]] = piece
 
     # reset rook if castled
     if rook_to and rook_from:
         for rook in you:
             if rook.pos == rook_to:
                 rook.pos = rook_from
+                board_table[rook.pos[0]][rook.pos[1]] = rook
 
     # reset takes if any
     if captured_piece:
         opponent.append(captured_piece)
+        board_table[captured_piece.pos[0]][captured_piece.pos[1]] = captured_piece
 
     return is_king_in_check
 
@@ -1011,7 +1097,7 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                 for x in all_pieces:
                     if x.id == piece_class.id:
 
-                        check_ = is_your_king_in_check(you=you, opponent=opponent, piece=x, new_row=row, new_col=col, pieces_white=pieces_white,pieces_black=pieces_black)
+                        check_ = is_your_king_in_check(you=you, opponent=opponent, piece=x, new_row=row, new_col=col, pieces_white=pieces_white,pieces_black=pieces_black,pawn_double_move=False)
                         if check_:
                             return False
 

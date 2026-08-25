@@ -1,5 +1,5 @@
 import constants
-from oop_chess_backend import Pawn,Rook,Knight,Bishop,Queen,King,Board
+from oop_chess_backend import Pawn,Rook,Knight,Bishop,Queen,King,Board, print_board_data_table, board_table
 index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
 # White pieces
@@ -159,6 +159,7 @@ pieces_black = [
 ]
 
 board1 = Board(pieces_white,pieces_black) 
+# print_board_data_table(board_table)
 board1.active_player_index = 0 # 0 = white, 1 = black
 
 # amount of possible end positions
@@ -178,7 +179,7 @@ def perft(board, depth):
         #     print(f"white plays {index_letter[move[0][1]]}{8-(move[0][0])} to {index_letter[move[1][1]]}{8-(move[1][0])}")
 
         # print(f"move is {move} and type is {type(move)}")
-        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(move[0],move[1]) # move the piece and give starting and ending positions for it
+        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(selected_piece=move[0],starting_pos=move[1],ending_pos=move[2]) 
 
         # if depth == 1:
         #     print(f"{index_letter[starting_pos[1]]}{8-starting_pos[0]} to {index_letter[ending_pos[1]]}{8-(ending_pos[0])}")
@@ -205,7 +206,7 @@ def perft_divide(board, depth):
     
     for move in legal_moves:
 
-        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(move[0],move[1]) 
+        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(selected_piece=move[0],starting_pos=move[1],ending_pos=move[2]) 
 
         nodes = perft(board, depth - 1)
         total_nodes += nodes
@@ -214,10 +215,10 @@ def perft_divide(board, depth):
         if valid_move:
             board.undo_move(starting_pos, ending_pos, last_taken_pieces)
 
-        print(f"{index_letter[move[0][1]]}{8-(move[0][0])} to {index_letter[move[1][1]]}{8-(move[1][0])}: {nodes}")
+        print(f"{index_letter[move[1][1]]}{8-(move[1][0])} to {index_letter[move[2][1]]}{8-(move[2][0])}: {nodes}")
         
     print(f"\nTotal Leaf Nodes: {total_nodes}")
 
 
-perft_divide(board1,5)
-
+perft_divide(board1,4)
+# 2 mins 40 seconds to run perft 5
