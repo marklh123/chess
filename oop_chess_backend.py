@@ -3,11 +3,6 @@ import constants
 letter_index = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
-
-# En passant doesnt get considered for check or checkmate
-# white bishops sometimes can't take black pieces on blacks back rank, doesn't take and image disapears on the same square, 
-# white queen too
-
 def init_board_table(pieces_white,pieces_black):
     for x in pieces_white + pieces_black:
                         row = x.pos[0]
@@ -80,8 +75,13 @@ class Board:
         return moves
 
     def make_move(self, selected_piece, starting_pos, ending_pos):
+
+        # At the beginning of make_move, before changing it
+        previous_pawn_double_move = self.pawn_double_move
         # selected_piece = None
         valid_move = False
+        castling_info = None
+
         you = self.pieces_white if selected_piece.color == "white" else self.pieces_black
         
         # if the piece isn't found in white or black
@@ -111,18 +111,32 @@ class Board:
             )
 
             # if castling didn't fail its a valid move
-            if result != "cancel castling":
+            if result[0] != "cancel castling":
                 valid_move = True
 
-            if result == "done castling":
-                print("TS is castling")
+            if "done castling" in result[0]: # need to get king and rook starting and ending positons for undo 
 
+                side = result[0][14:]
+                castled_king = selected_piece
+                castled_king_original_pos = [king_row,king_col]
+                castled_rook = result[1]
+                castled_rook_original_pos = result[2]
+
+                castling_info = {"castled_king" : castled_king, "castled_king_original_pos" : castled_king_original_pos, "castled_rook" : castled_rook, "castled_rook_original_pos" : castled_rook_original_pos}
+
+                # update board_table with castled postions
+                board_table[castled_king_original_pos[0]][castled_king_original_pos[1]] = "_"
+                board_table[castled_king.pos[0]][castled_king.pos[1]] = castled_king
+
+                board_table[castled_rook_original_pos[0]][castled_rook_original_pos[1]] = "_"
+                board_table[castled_rook.pos[0]][castled_rook.pos[1]] = castled_rook
+  
         # if the move is valid then move, look for takes, and change turns
         if valid_move:
 
             # check if the move was a double pawn move
             if selected_piece.type == "pawn" and abs(ending_pos[0] - selected_piece.pos[0]) == 2:
-                self.pawn_double_move = selected_piece
+                self.pawn_double_move = {"double_move_pawn" : selected_piece, "original_pos" : selected_piece.pos}
             else:
                 self.pawn_double_move = None
 
@@ -132,12 +146,37 @@ class Board:
             board_table[selected_piece.pos[0]][selected_piece.pos[1]] = selected_piece
 
             # check if move took any pieces
-            last_taken_piece = Takes(self.pieces_white,self.pieces_black,selected_piece,self.taken_list_white,self.taken_list_black)
+            last_taken_piece = Takes(self.pieces_white,self.pieces_black,selected_piece,self.taken_list_white,self.taken_list_black, previous_pawn_double_move)
 
             self.change_turns()
-        return starting_pos, ending_pos, last_taken_piece, valid_move
+        return starting_pos, ending_pos, last_taken_piece, valid_move, castling_info, previous_pawn_double_move
 
-    def undo_move(self, starting_pos, ending_pos,taken_piece):
+    def undo_move(self, starting_pos, ending_pos,taken_piece, castling_info, previous_pawn_double_move):
+
+        # undo castling
+        if castling_info:
+            king = castling_info.get("castled_king")
+            king_original_pos = castling_info.get("castled_king_original_pos")
+            rook = castling_info["castled_rook"]
+            rook_original_pos = castling_info["castled_rook_original_pos"]
+
+            # undo moved king 
+            board_table[king.pos[0]][king.pos[1]] = "_"
+            king.pos = king_original_pos
+            king.moves -= 1
+            board_table[king.pos[0]][king.pos[1]] = king
+
+            # undo moved rook
+            board_table[rook.pos[0]][rook.pos[1]] = "_"
+            rook.pos = rook_original_pos
+            rook.moves -= 1
+            board_table[rook.pos[0]][rook.pos[1]] = rook
+
+            self.change_turns()
+            self.pawn_double_move = previous_pawn_double_move
+            return
+            
+
         selected_piece = None
                 
         # if new moves positon isn't one of the pieces
@@ -163,7 +202,6 @@ class Board:
         selected_piece.moves -= 1
         board_table[selected_piece.pos[0]][selected_piece.pos[1]] = selected_piece
 
-
         # undo takes
         if taken_piece:
             if selected_piece.color == "white":
@@ -176,9 +214,9 @@ class Board:
 
             board_table[taken_piece.pos[0]][taken_piece.pos[1]] = taken_piece
 
+        self.pawn_double_move = previous_pawn_double_move
 
-        self.change_turns()
-    
+        self.change_turns() 
 class Piece():
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         self.color = color
@@ -190,7 +228,7 @@ class Piece():
         self.image = image
    
     def __getstate__(self):
-            # Defines exactly what data from a Python class should be saved (serialized) when exporting it to a file or stream or copy
+            # Defines exactly what data from a Python class should be saved (serialized) when exporting it to a file or copy
             state = self.__dict__.copy()
             if 'image' in state:
                 del state['image']
@@ -200,7 +238,6 @@ class Piece():
         # Restore the state and give image a default value
         self.__dict__.update(state)
         self.image = None
-
 
 class Pawn(Piece):  
     def __init__(self,color=None,type=None,pos=None,moves=None,id=None,symbol=None,image=None):
@@ -217,27 +254,32 @@ class Pawn(Piece):
 
         row, col = self.pos
 
+        # checks through castling
+        if look_for_check and ([row + direction, col + 1] == look_for_check or [row + direction, col - 1] == look_for_check):
+            return True
+
         for op in op_pieces:
             op_row = op.pos[0]
             op_col = op.pos[1]
 
             if (([op_row, op_col] == [row + direction, col + 1]) or
                 ([op_row, op_col] == [row + direction, col - 1])):
-
-                if look_for_check and [op_row, op_col] == look_for_check:
-                    return True
                     
                 takes.append([op_row, op_col])
 
         # en passant, check if opponents pawn that just moved twice is in en passant range
-        if pawn_double_move and (pawn_double_move.pos == [row, col+1] or
-                                pawn_double_move.pos == [row, col-1]):
+        if pawn_double_move:
+
+            pawn = pawn_double_move.get("double_move_pawn")
+            
+            if (pawn.pos == [row, col+1] or
+                                pawn.pos == [row, col-1]):
 
         
-            if look_for_check and ([row, col+1] == look_for_check or [row, col] == look_for_check):
-                return True
-            
-            takes.append([pawn_double_move.pos[0]+direction,pawn_double_move.pos[1]]) 
+                if look_for_check and ([row, col+1] == look_for_check or [row, col] == look_for_check):
+                    return True
+                
+                takes.append([pawn.pos[0]+direction,pawn.pos[1]]) 
 
         if look_for_check:
             return False
@@ -330,12 +372,8 @@ class Bishop(Piece):
         row, col = self.pos
         
         if self.color == 'white':
-            your_color = pieces_white
-            opponent_color = pieces_black
             opp_color = "black"
         else:
-            your_color =  pieces_black
-            opponent_color = pieces_white
             opp_color = "white"
 
         new_pos = []
@@ -345,12 +383,6 @@ class Bishop(Piece):
         for dr, dc in directions:
             r = row
             c = col
-
-            piece_on_table = board_table[r][c]
-            # try:
-            #     print(f" piece on table: {piece_on_table.symbol}")
-            # except:
-            #     print(f" piece on table: {piece_on_table}")
 
             while True:
                 r += dr
@@ -362,28 +394,22 @@ class Bishop(Piece):
                     break
 
                 occupant = board_table[r][c]
-                # try:
-                #     print(f" occupant on table: {occupant.symbol} pos: [{r}][{c}]")
-                # except:
-                #     print(f" occupant on table: {occupant} pos: [{r}][{c}] ")
 
                 # your color
                 if occupant != "_" and occupant.color == self.color:
                     break
 
+                # outside of opp color if statement because for castling the square might be empty
+                elif look_for_check and [r, c] == look_for_check:
+                    return True
+                
                 # opp color
                 elif occupant != "_" and occupant.color == opp_color:
                     new_pos.append([r, c])
-                    # print(f"Valid move!")
-
-                    if look_for_check and [r, c] == look_for_check:
-                        return True
                     
                     break
-                
 
                 new_pos.append([r, c])
-                # print(f"Valid move!")
 
         if look_for_check:
             return False
@@ -422,23 +448,18 @@ class Rook(Piece):
                     break
 
                 occupant = board_table[r][c]
-                # try:
-                #     print(f" occupant on table: {occupant.symbol} pos: [{r}][{c}]")
-                # except:
-                #     print(f" occupant on table: {occupant} pos: [{r}][{c}] ")
-
+            
                 # your color
                 if occupant != "_" and occupant.color == self.color:
                     break
 
+                # outside of opp color if statement because for castling the square might be empty
+                elif look_for_check and [r, c] == look_for_check:
+                    return True
+                
                 # opp color
                 elif occupant != "_" and occupant.color == opp_color:
-                    new_pos.append([r, c])
-                    # print(f"Valid move!")
-
-                    if look_for_check and [r, c] == look_for_check:
-                        return True
-                    
+                    new_pos.append([r, c])                    
                     break
 
 
@@ -456,12 +477,8 @@ class Queen(Piece):
         row, col = self.pos
 
         if self.color == "white":
-            your_color = pieces_white
-            opponent_color = pieces_black
             opp_color = "black"
         else:
-            your_color = pieces_black
-            opponent_color = pieces_white
             opp_color = "white"
 
         new_pos = []
@@ -487,14 +504,13 @@ class Queen(Piece):
                 if occupant != "_" and occupant.color == self.color:
                     break
 
+                # outside of opp color if statement because for castling the square might be empty
+                elif look_for_check and [r, c] == look_for_check:
+                    return True
+
                 # opp color
                 elif occupant != "_" and occupant.color == opp_color:
                     new_pos.append([r, c])
-                    # print(f"Valid move!")
-
-                    if look_for_check and [r, c] == look_for_check:
-                        return True
-                    
                     break
 
                 new_pos.append([r, c])
@@ -506,7 +522,7 @@ class Queen(Piece):
 class King(Piece):
     def __init__(self, color=None, type=None,pos=None,moves=None,id=None,symbol=None,image=None):
         super().__init__(color, type, pos, moves, id, symbol, image)
-    def rule(self,pieces_white,pieces_black):
+    def rule(self,pieces_white,pieces_black, look_for_check=None):
         row, col = self.pos
         all_pieces = pieces_white+pieces_black
 
@@ -515,6 +531,7 @@ class King(Piece):
         your_color = pieces_white if self.color == "white" else pieces_black
 
         if self.moves == 0:
+
             # occupied_cols are all pieces cols that are in the same row as king
             occupied_cols = [p.pos[1] for p in all_pieces if p.pos[0] == row and p.type != "king"]
             # King-side castling: f and g must be empty (col+1 and col+2)
@@ -543,9 +560,11 @@ class King(Piece):
         if self.color == 'white':
             your_color = pieces_white
             opponent_color = pieces_black
+            opp_color = "black"
         else:
             your_color =  pieces_black
             opponent_color = pieces_white
+            opp_color = "white"
         
 
         for move in new_moves:
@@ -556,16 +575,26 @@ class King(Piece):
             elif temp_col < 0 or temp_col > 7:
                 continue
 
-            if any(p.pos == [temp_row, temp_col] for p in your_color):
-                continue
+            occupant = board_table[temp_row][temp_col]
 
-            if any(p.pos == [temp_row,temp_col] for p in opponent_color):
-                new_pos.append([temp_row, temp_col])
+            # your color
+            if occupant != "_" and occupant.color == self.color:
+                continue    
+
+            elif look_for_check and [temp_row, temp_col] == look_for_check:
+                return True
+            
+            # opp color
+            elif occupant != "_" and occupant.color == opp_color:
+                new_pos.append([temp_row, temp_col])                
                 continue
 
             new_pos.append([temp_row, temp_col])
 
-        return new_pos
+        if look_for_check:
+            return False
+        else:
+            return new_pos
 
 def validate_move(attempted_move):
     if len(attempted_move) > 2 or len(attempted_move) < 2:
@@ -655,7 +684,7 @@ def main():
                 board.change_turns()
                 
 def find_piece(you,pieces_white,pieces_black,piece_pos):
-    # check if the selected cord has one of your pieces on it
+    # check if the selected pos has one of your pieces on it
 
     if you == 0:
         your_dict = pieces_white
@@ -692,14 +721,15 @@ def PawnPromotion(piece,row,col,pieces_white,pieces_black):
             del your_pieces[x]
             q2b= Queen(color="black",type="queen",moves=0,id="q2b",symbol="♛",pos=[row, col],image=constants.black_queen)
             your_pieces.append(q2b)
-            board_table[row][col] = q2b
-            
+            board_table[row][col] = q2b      
 
-def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
+def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black, previous_pawn_double_move):
 
     taken_piece = None
     opponent_pieces = pieces_black if piece.color == "white" else pieces_white
     direction = -1 if piece.color == "white" else 1
+    if previous_pawn_double_move:
+        op_double_pawn = previous_pawn_double_move.get("double_move_pawn")
 
     # check for regular takes
     for x, op in enumerate(opponent_pieces):
@@ -752,59 +782,32 @@ def Takes(pieces_white,pieces_black,piece,take_list_white,take_list_black):
             return op
 
     # check for en passant takes (after regular takes)
-    for x, op in enumerate(opponent_pieces):
-        if [op.pos[0],op.pos[1]] == [piece.pos[0]-direction,piece.pos[1]] and piece.type == "pawn":
-            taken_piece = op
-                        
-            match op.type:
-                case "pawn":
-                    if op.color == "white":
-                        taken_piece.image = constants.white_pawn_tiny
-                    else:
-                        taken_piece.image = constants.black_pawn_tiny
-                    
-                case "rook":
-                    if op.color == "white":
-                        taken_piece.image = constants.white_rook_tiny
-                    else:
-                        taken_piece.image = constants.black_rook_tiny
-                
-                case "knight":
-                    if op.color == "white":
-                        taken_piece.image = constants.white_knight_tiny
-                    else:
-                        taken_piece.image = constants.black_knight_tiny
-                
-                case "bishop":
-                    if op.color == "white":
-                        taken_piece.image = constants.white_bishop_tiny
-                    else:
-                        taken_piece.image = constants.black_bishop_tiny
-                
-                case "queen":
-                    if op.color == "white":
-                        taken_piece.image = constants.white_queen_tiny
-                    else:
-                        taken_piece.image = constants.black_queen_tiny
+    if previous_pawn_double_move:
+        if [op_double_pawn.pos[0],op_double_pawn.pos[1]] == [piece.pos[0]-direction,piece.pos[1]] and piece.type == "pawn":
+            taken_piece = op_double_pawn            
+    
+            if op.color == "white":
+                taken_piece.image = constants.white_pawn_tiny
+            else:
+                taken_piece.image = constants.black_pawn_tiny
 
-            del opponent_pieces[x]
-            board_table[op.pos[0]][op.pos[1]] = "_"
+            opponent_pieces.remove(taken_piece)
+            board_table[taken_piece.pos[0]][taken_piece.pos[1]] = "_"
 
             if taken_piece:
-                if op.color == "white":
+                if taken_piece.color == "white":
                     take_list_white.append(taken_piece)
                 else:
                     take_list_black.append(taken_piece)
 
-            return op
-
+            return taken_piece
 
 def Castling(black, white, xx, col, new_col, new_row, your_color):
 
         # check if it moved 2 squares right 
         if (([new_row, new_col] != [xx, (col + 2)]) and
                 ([new_row, new_col] != [xx, (col - 2)])):
-                return "not_castling"
+                return ["not_castling"]
 
         # king side castling
         if [new_row, new_col] == [xx, (col + 2)]:
@@ -818,14 +821,15 @@ def Castling(black, white, xx, col, new_col, new_row, your_color):
                     if (piece2.pos == [xx, rook_col]) and (piece2.type == "rook"):
                         rook = piece2
                         if piece2.moves > 0:
-                            return "cancel castling"
+                            return ["cancel castling"]
                         break
 
                 if rook:
+                    rook_old_pos = rook.pos
                     new_rook_col = col + 1
                     rook.pos = [xx, new_rook_col]
                     rook.moves += 1
-                    return "done castling"
+                    return ["done castling kingside", rook, rook_old_pos] # return what side castling, the rooks old pos, and the rooks new pos
                 
         # queen side castling
         if [new_row, new_col] == [xx, (col - 2)]:
@@ -840,14 +844,15 @@ def Castling(black, white, xx, col, new_col, new_row, your_color):
                     if (piece2.pos == [xx, rook_col]) and (piece2.type == "rook"):
                         rook = piece2
                         if piece2.moves > 0:
-                            return "cancel castling"
+                            return ["cancel castling"]
                         break
 
                 if rook:
+                    rook_old_pos = rook.pos
                     new_rook_col = col - 1
                     rook.pos = [xx, new_rook_col]
                     rook.moves += 1
-                    return "done castling"
+                    return ["done castling queenside", rook, rook_old_pos]
 
         return "cancel castling"
 
@@ -872,12 +877,11 @@ def all_new_moves_opponent_for_check_test(opp, pieces_white, pieces_black, king_
         if i.type == "pawn": 
             if i.rule_pawn_takes(pieces_white,pieces_black,False,king_pos):
                 return True
-        elif i.type != "king":
+        else:
             if i.rule(pieces_white,pieces_black,king_pos):
                 return True
 
     return False
-
     
 def castling_check(new_col, original_col, new_row, you_sim):
     # updates rooks position if castled
@@ -916,7 +920,29 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
     # castling, track original rook pos
     king_moved_two = piece.type == "king" and abs(new_col - original_col) == 2
     if king_moved_two:
-        rook_from,rook_to = castling_check(new_col=new_col,original_col=original_col,new_row=new_row,you_sim=you)
+
+        # get rooks orignal and end positions to later reset
+        rook_from,rook_to = castling_check(new_col=new_col,original_col=original_col,new_row=new_row,you_sim=you) 
+
+        step = 1 if new_col > original_col else -1 # direction king goes, kingside or queenside
+
+        # all squares the king has to go through when castling
+        castling_squares = [
+            [original_row, original_col],
+            [original_row, original_col + step],
+            [original_row, original_col + 2 * step],
+        ]
+
+        # check if all those squares aren't attacked, if they are then your king is in check and can't castle
+        for square in castling_squares:
+            if all_new_moves_opponent_for_check_test(
+                opp=opponent,
+                pieces_white=pieces_white,
+                pieces_black=pieces_black,
+                king_pos=square
+            ):
+                is_king_in_check = True
+                break
 
     # if new move is take, temporarily remove the captured piece from opponent
     captured_piece = None
@@ -929,10 +955,13 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
     # must be a pawn
     if moved_piece.type == "pawn": # must be a pawn
         if pawn_double_move: # opponent must've just had a double move
-            if (pawn_double_move.pos == [original_row, original_col+1]
-                and (new_row == original_row + direction and new_col - original_col == 1)) or (pawn_double_move.pos == [original_row, original_col-1] and (new_row == original_row + direction and new_col - original_col == - 1)):
+
+            pawn = pawn_double_move.get("double_move_pawn")
+
+            if (pawn.pos == [original_row, original_col+1]
+                and (new_row == original_row + direction and new_col - original_col == 1)) or (pawn.pos == [original_row, original_col-1] and (new_row == original_row + direction and new_col - original_col == - 1)):
                 if destination_occupant == "_":
-                    captured_piece = pawn_double_move
+                    captured_piece = pawn
                     board_table[captured_piece.pos[0]][captured_piece.pos[1]] = "_"
         
     if captured_piece:
@@ -944,10 +973,11 @@ def is_your_king_in_check(you, opponent, piece, new_row, new_col, pieces_white, 
     king_pos = your_king.pos
 
     # check if your kings pos is in opp check
-    if you == pieces_white:
-        is_king_in_check = all_new_moves_opponent_for_check_test(opp=opponent, pieces_white=you, pieces_black=opponent, king_pos=king_pos)
-    elif you == pieces_black:
-        is_king_in_check = all_new_moves_opponent_for_check_test(opp=opponent, pieces_white=opponent, pieces_black=you, king_pos=king_pos)
+    if not is_king_in_check:
+        if you == pieces_white:
+            is_king_in_check = all_new_moves_opponent_for_check_test(opp=opponent, pieces_white=you, pieces_black=opponent, king_pos=king_pos)
+        elif you == pieces_black:
+            is_king_in_check = all_new_moves_opponent_for_check_test(opp=opponent, pieces_white=opponent, pieces_black=you, king_pos=king_pos)
 
     # reset moved piece
     board_table[moved_piece.pos[0]][moved_piece.pos[1]] = "_"
@@ -1115,12 +1145,12 @@ def make_a_move(piece_aviable_moves,pieces_white,pieces_black,piece_class):
                             else:
                                 result = Castling(black=pieces_black, white=pieces_white,  xx=king_row, col=king_col, new_col=col, new_row=row, your_color=pieces_black)
                             
-                            if result == "not_castling":
+                            if result[0] == "not_castling":
                                 x.pos = [row,col]
                                 x.moves+=1
-                            elif result == "cancel castling":
+                            elif result[0] == "cancel castling":
                                 return False
-                            elif result == "done castling":
+                            elif "done castling" in result[0]:
                                 x.pos = [row,col]
                                 x.moves+=1
                         

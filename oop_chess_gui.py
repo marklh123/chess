@@ -1,7 +1,7 @@
 import pygame  
 from pygame.locals import *
 from oop_chess_backend import is_your_king_in_check, Castling, Takes, PawnPromotion \
-    , is_opponent_king_in_check, is_checkmate_opponent, pieces_white,pieces_black
+    , is_opponent_king_in_check, is_checkmate_opponent, pieces_white,pieces_black, board_table, init_board_table
 
 
 # from oop_chess_tests import pieces_white, pieces_black
@@ -9,6 +9,7 @@ from oop_chess_backend import is_your_king_in_check, Castling, Takes, PawnPromot
 pygame.init()
 pygame.display.set_caption("Chess V2")
 clock = pygame.time.Clock()
+init_board_table(pieces_white,pieces_black)
 from constants import pos_to_pixel
 import constants
 import random
@@ -53,6 +54,7 @@ class App:
         self.taken_pieces_black = []
         self.pve = False
         self.pawn_double_move = None
+        self.previous_pawn_double_move = None
 
     def set_player_and_opp(self):
         self.you = pieces_white if self.active_player_index == 0 else pieces_black
@@ -89,14 +91,12 @@ class App:
             # see if target position is valid first
             target = [self.clicked_row, self.clicked_col]
             clicked_row_two, clicked_col_two = self.clicked_row, self.clicked_col
-            
-            check_ = is_your_king_in_check(self.you, self.opp, self.selected_piece, clicked_row_two, clicked_col_two, pieces_white,pieces_black)
-
-            # can't do moves that don't save king while in check
-            if check_ and target in self.available_moves:
-                self.available_moves.remove(target)
 
             if target in self.available_moves:
+
+                check_ = is_your_king_in_check(self.you, self.opp, self.selected_piece, clicked_row_two, clicked_col_two, pieces_white,pieces_black,self.pawn_double_move)
+                if check_: return
+
                 valid_move = False
 
                 # normal move
@@ -134,52 +134,56 @@ class App:
                         
                 # move the piece
                 if valid_move:
+                    self.previous_pawn_double_move = self.pawn_double_move
 
                     if self.selected_piece.type == "pawn" and abs(clicked_row_two - self.selected_piece.pos[0]) == 2:
                         print("Double move!!!")
-        
-                        self.pawn_double_move = self.selected_piece
+                        self.pawn_double_move = {"double_move_pawn" : self.selected_piece, "original_pos" : self.selected_piece.pos}
                     else:
                         self.pawn_double_move = None
 
                     print(f"Inital pos: {self.selected_piece.pos[0]},{self.selected_piece.pos[1]}")
                     print(f"New pos: {clicked_row_two},{clicked_col_two}")
-                    
+                    old_row, old_col = self.selected_piece.pos
+                    new_row, new_col = clicked_row_two, clicked_col_two
+                    board_table[old_row][old_col] = "_"
+
                     self.selected_piece.pos = [clicked_row_two, clicked_col_two]
                     self.selected_piece.moves += 1
+                    board_table[new_row][new_col] = self.selected_piece
                     constants.move_piece_sound.play()
                 
-                # remove any captured opponent piece
-                Takes(pieces_white,pieces_black,self.selected_piece,self.taken_pieces_white,self.taken_pieces_black)
+                    # remove any captured opponent piece
+                    Takes(pieces_white,pieces_black,self.selected_piece,self.taken_pieces_white,self.taken_pieces_black, self.previous_pawn_double_move)
 
-                # pawn promotion
-                PawnPromotion(self.selected_piece, self.clicked_row, self.clicked_col, pieces_white, pieces_black)
+                    # pawn promotion
+                    PawnPromotion(self.selected_piece, self.clicked_row, self.clicked_col, pieces_white, pieces_black)
 
-                # check and checkmate (for text)
-                self.white_in_check = False
-                self.black_in_check = False
+                    # check and checkmate (for text)
+                    self.white_in_check = False
+                    self.black_in_check = False
 
-                check_ = is_opponent_king_in_check(self.you, self.opp, pieces_white, pieces_black)
-                if check_:
-                    if self.opp == pieces_white:
-                        self.white_in_check = True
-                    elif self.opp == pieces_black:
-                        self.black_in_check = True
+                    check_ = is_opponent_king_in_check(self.you, self.opp, pieces_white, pieces_black)
+                    if check_:
+                        if self.opp == pieces_white:
+                            self.white_in_check = True
+                        elif self.opp == pieces_black:
+                            self.black_in_check = True
 
-                    self.checkmate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
+                        self.checkmate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
 
-                    if self.checkmate:
-                        constants.checkmate_sound.play()
-                    else:
-                        constants.check_sound.play()
-                
-                elif not check_:
-                    self.stalemate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
+                        if self.checkmate:
+                            constants.checkmate_sound.play()
+                        else:
+                            constants.check_sound.play()
+                    
+                    elif not check_:
+                        self.stalemate = is_checkmate_opponent(self.you, self.opp,pieces_white,pieces_black)
 
-                    if self.checkmate:
-                        constants.checkmate_sound.play()
+                        if self.checkmate:
+                            constants.checkmate_sound.play()
 
-                self.active_player_index = (self.active_player_index + 1) % 2
+                    self.active_player_index = (self.active_player_index + 1) % 2
                 
             # either way, deselect
             self.selected_piece = None

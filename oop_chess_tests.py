@@ -2,161 +2,55 @@ import constants
 from oop_chess_backend import Pawn,Rook,Knight,Bishop,Queen,King,Board, print_board_data_table, board_table
 index_letter = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
 
-# White pieces
+# Canonical Kiwipete position:
+# r3k2r/p1ppqpb1/bn2pnp1/2pP4/1p2P3/2N2N1p/PPPBBPPP/R3K2R w KQkq - 0 1
 
-p1w = Pawn(
-    color="white", type="pawn", pos=[6, 0], moves=0,
-    id="p1w", symbol="♙", image=constants.white_pawn
-)
-p2w = Pawn(
-    color="white", type="pawn", pos=[6, 1], moves=0,
-    id="p2w", symbol="♙", image=constants.white_pawn
-)
-p3w = Pawn(
-    color="white", type="pawn", pos=[6, 2], moves=0,
-    id="p3w", symbol="♙", image=constants.white_pawn
-)
-p4w = Pawn(
-    color="white", type="pawn", pos=[6, 3], moves=0,
-    id="p4w", symbol="♙", image=constants.white_pawn
-)
-p5w = Pawn(
-    color="white", type="pawn", pos=[6, 4], moves=0,
-    id="p5w", symbol="♙", image=constants.white_pawn
-)
-p6w = Pawn(
-    color="white", type="pawn", pos=[6, 5], moves=0,
-    id="p6w", symbol="♙", image=constants.white_pawn
-)
-p7w = Pawn(
-    color="white", type="pawn", pos=[6, 6], moves=0,
-    id="p7w", symbol="♙", image=constants.white_pawn
-)
-p8w = Pawn(
-    color="white", type="pawn", pos=[6, 7], moves=0,
-    id="p8w", symbol="♙", image=constants.white_pawn
-)
-
-r1w = Rook(
-    color="white", type="rook", pos=[7, 0], moves=0,
-    id="r1w", symbol="♖", image=constants.white_rook
-)
-r2w = Rook(
-    color="white", type="rook", pos=[7, 7], moves=0,
-    id="r2w", symbol="♖", image=constants.white_rook
-)
-
-k1w = Knight(
-    color="white", type="knight", pos=[7, 1], moves=0,
-    id="k1w", symbol="♘", image=constants.white_knight
-)
-k2w = Knight(
-    color="white", type="knight", pos=[7, 6], moves=0,
-    id="k2w", symbol="♘", image=constants.white_knight
-)
-
-b1w = Bishop(
-    color="white", type="bishop", pos=[7, 2], moves=0,
-    id="b1w", symbol="♗", image=constants.white_bishop
-)
-b2w = Bishop(
-    color="white", type="bishop", pos=[7, 5], moves=0,
-    id="b2w", symbol="♗", image=constants.white_bishop
-)
-
-qw = Queen(
-    color="white", type="queen", pos=[7, 3], moves=0,
-    id="qw", symbol="♕", image=constants.white_queen
-)
-
-kingw = King(
-    color="white", type="king", pos=[7, 4], moves=0,
-    id="kingw", symbol="♔", image=constants.white_king
-)
-
-
-# Black pieces
-
-p1b = Pawn(
-    color="black", type="pawn", pos=[1, 0], moves=0,
-    id="p1b", symbol="♟", image=constants.black_pawn
-)
-p2b = Pawn(
-    color="black", type="pawn", pos=[1, 1], moves=0,
-    id="p2b", symbol="♟", image=constants.black_pawn
-)
-p3b = Pawn(
-    color="black", type="pawn", pos=[1, 2], moves=0,
-    id="p3b", symbol="♟", image=constants.black_pawn
-)
-p4b = Pawn(
-    color="black", type="pawn", pos=[1, 3], moves=0,
-    id="p4b", symbol="♟", image=constants.black_pawn
-)
-p5b = Pawn(
-    color="black", type="pawn", pos=[1, 4], moves=0,
-    id="p5b", symbol="♟", image=constants.black_pawn
-)
-p6b = Pawn(
-    color="black", type="pawn", pos=[1, 5], moves=0,
-    id="p6b", symbol="♟", image=constants.black_pawn
-)
-p7b = Pawn(
-    color="black", type="pawn", pos=[1, 6], moves=0,
-    id="p7b", symbol="♟", image=constants.black_pawn
-)
-p8b = Pawn(
-    color="black", type="pawn", pos=[1, 7], moves=0,
-    id="p8b", symbol="♟", image=constants.black_pawn
-)
-
-r1b = Rook(
-    color="black", type="rook", pos=[0, 0], moves=0,
-    id="r1b", symbol="♜", image=constants.black_rook
-)
-r2b = Rook(
-    color="black", type="rook", pos=[0, 7], moves=0,
-    id="r2b", symbol="♜", image=constants.black_rook
-)
-
-k1b = Knight(
-    color="black", type="knight", pos=[0, 1], moves=0,
-    id="k1b", symbol="♞", image=constants.black_knight
-)
-k2b = Knight(
-    color="black", type="knight", pos=[0, 6], moves=0,
-    id="k2b", symbol="♞", image=constants.black_knight
-)
-
-b1b = Bishop(
-    color="black", type="bishop", pos=[0, 2], moves=0,
-    id="b1b", symbol="♝", image=constants.black_bishop
-)
-b2b = Bishop(
-    color="black", type="bishop", pos=[0, 5], moves=0,
-    id="b2b", symbol="♝", image=constants.black_bishop
-)
-
-qb = Queen(
-    color="black", type="queen", pos=[0, 3], moves=0,
-    id="qb", symbol="♛", image=constants.black_queen
-)
-
-kingb = King(
-    color="black", type="king", pos=[0, 4], moves=0,
-    id="kingb", symbol="♚", image=constants.black_king
-)
-
-
+# Pawns still on their original rank have moves=0. Pawns elsewhere use
+# moves=1 so this engine does not give them another initial double move.
 pieces_white = [
-    p1w, p2w, p3w, p4w, p5w, p6w, p7w, p8w,
-    r1w, r2w, k1w, k2w, b1w, b2w, qw, kingw
+    Pawn("white", "pawn", [6, 0], 0, "wpa2", "♙", constants.white_pawn),
+    Pawn("white", "pawn", [6, 1], 0, "wpb2", "♙", constants.white_pawn),
+    Pawn("white", "pawn", [6, 2], 0, "wpc2", "♙", constants.white_pawn),
+    Pawn("white", "pawn", [3, 3], 1, "wpd5", "♙", constants.white_pawn),
+    Pawn("white", "pawn", [4, 4], 1, "wpe4", "♙", constants.white_pawn),
+    Pawn("white", "pawn", [6, 5], 0, "wpf2", "♙", constants.white_pawn),
+    Pawn("white", "pawn", [6, 6], 0, "wpg2", "♙", constants.white_pawn),
+    Pawn("white", "pawn", [6, 7], 0, "wph2", "♙", constants.white_pawn),
+    Rook("white", "rook", [7, 0], 0, "wra1", "♖", constants.white_rook),
+    Rook("white", "rook", [7, 7], 0, "wrh1", "♖", constants.white_rook),
+    Knight("white", "knight", [5, 2], 1, "wnc3", "♘", constants.white_knight),
+    Queen("white", "queen", [5, 5], 1, "wqf3", "♕", constants.white_queen),
+    Bishop("white", "bishop", [6, 3], 1, "wbd2", "♗", constants.white_bishop),
+    Bishop("white", "bishop", [6, 4], 1, "wbe2", "♗", constants.white_bishop),
+    King("white", "king", [7, 4], 0, "wke1", "♔", constants.white_king),
+    Knight("white", "knight", [3,4], 0, "wne5", "♘", constants.white_knight)
 ]
 
 pieces_black = [
-    p1b, p2b, p3b, p4b, p5b, p6b, p7b, p8b,
-    r1b, r2b, k1b, k2b, b1b, b2b, qb, kingb
+    Pawn("black", "pawn", [1, 0], 0, "bpa7", "♟", constants.black_pawn),
+    Pawn("black", "pawn", [4, 1], 1, "bpb4", "♟", constants.black_pawn),
+    Pawn("black", "pawn", [1, 2], 0, "bpc7", "♟", constants.black_pawn),
+    # Pawn("black", "pawn", [3, 2], 1, "bpc5", "♟", constants.black_pawn),
+    Pawn("black", "pawn", [1, 3], 0, "bpd7", "♟", constants.black_pawn),
+    Pawn("black", "pawn", [2, 4], 1, "bpe6", "♟", constants.black_pawn),
+    Pawn("black", "pawn", [1, 5], 0, "bpf7", "♟", constants.black_pawn),
+    Pawn("black", "pawn", [2, 6], 1, "bpg6", "♟", constants.black_pawn),
+    Pawn("black", "pawn", [5, 7], 1, "bph3", "♟", constants.black_pawn),
+    Rook("black", "rook", [0, 0], 0, "bra8", "♜", constants.black_rook),
+    Rook("black", "rook", [0, 7], 0, "brh8", "♜", constants.black_rook),
+    Knight("black", "knight", [2, 1], 1, "bnb6", "♞", constants.black_knight),
+    Knight("black", "knight", [2, 5], 1, "bnf6", "♞", constants.black_knight),
+    Bishop("black", "bishop", [2, 0], 1, "bba6", "♝", constants.black_bishop),
+    Bishop("black", "bishop", [1, 6], 1, "bbg7", "♝", constants.black_bishop),
+    Queen("black", "queen", [1, 4], 1, "bqe7", "♛", constants.black_queen),
+    King("black", "king", [0, 4], 0, "bke8", "♚", constants.black_king),
 ]
+
+# The backend creates its own global starting board during import. Clear its
+# shared occupancy table before initializing this different test position.
+for row in range(8):
+    for col in range(8):
+        board_table[row][col] = "_"
 
 board1 = Board(pieces_white,pieces_black) 
 # print_board_data_table(board_table)
@@ -169,29 +63,17 @@ def perft(board, depth):
     
     nodes = 0
     legal_moves = board.get_moves() 
-
-    # if depth == 2:
-    #     print(f"There are {len(legal_moves)} legal moves")
     
     for move in legal_moves:
 
-        # if depth == 2:
-        #     print(f"white plays {index_letter[move[0][1]]}{8-(move[0][0])} to {index_letter[move[1][1]]}{8-(move[1][0])}")
-
-        # print(f"move is {move} and type is {type(move)}")
-        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(selected_piece=move[0],starting_pos=move[1],ending_pos=move[2]) 
-
-        # if depth == 1:
-        #     print(f"{index_letter[starting_pos[1]]}{8-starting_pos[0]} to {index_letter[ending_pos[1]]}{8-(ending_pos[0])}")
+        starting_pos, ending_pos, last_taken_pieces, valid_move, castling_info, previous_pawn_double_move = board.make_move(selected_piece=move[0],starting_pos=move[1],ending_pos=move[2]) 
 
         nodes_to_add = perft(board,depth-1)
-        # if depth == 2:
-        #     print("Nodes to add: ", nodes_to_add)
         nodes += nodes_to_add
 
         # only undo move if it moved
-        if valid_move:
-            board.undo_move(starting_pos,ending_pos, last_taken_pieces)
+        if valid_move or castling_info:
+            board.undo_move(starting_pos,ending_pos, last_taken_pieces, castling_info, previous_pawn_double_move)
 
         
     return nodes
@@ -206,19 +88,19 @@ def perft_divide(board, depth):
     
     for move in legal_moves:
 
-        starting_pos, ending_pos, last_taken_pieces, valid_move = board.make_move(selected_piece=move[0],starting_pos=move[1],ending_pos=move[2]) 
+        starting_pos, ending_pos, last_taken_pieces, valid_move, castling_info, previous_pawn_double_move = board.make_move(selected_piece=move[0],starting_pos=move[1],ending_pos=move[2]) 
 
         nodes = perft(board, depth - 1)
         total_nodes += nodes
 
         # only undo move if it moved
-        if valid_move:
-            board.undo_move(starting_pos, ending_pos, last_taken_pieces)
+        if valid_move or castling_info:
+            board.undo_move(starting_pos, ending_pos, last_taken_pieces, castling_info, previous_pawn_double_move)
 
         print(f"{index_letter[move[1][1]]}{8-(move[1][0])} to {index_letter[move[2][1]]}{8-(move[2][0])}: {nodes}")
         
     print(f"\nTotal Leaf Nodes: {total_nodes}")
 
 
-perft_divide(board1,4)
+perft_divide(board1,3)
 # 2 mins 40 seconds to run perft 5
