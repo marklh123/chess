@@ -1,5 +1,5 @@
 # Chess by Mark
-A two-player chess game built with Python and Pygame. Includes a full graphical interface with click-to-move controls, move highlighting, check/checkmate/stalemate detection, castling, and pawn promotion. 
+A two-player chess game built with Python and Pygame. Includes a full graphical interface with click-to-move controls, move highlighting, check/checkmate/stalemate detection, castling, pawn promotion, and en passant. 
 
 <img width="300" height="300" alt="Screenshot 2026-10-01 at 4 31 55 PM" src="https://github.com/user-attachments/assets/60f92d84-bcae-4dde-80f3-bd59c76056d1" />
 
@@ -16,7 +16,6 @@ A two-player chess game built with Python and Pygame. Includes a full graphical 
 
 ## Limitations
 - Pawn promotion always promotes to queen, no piece choice
-- No en passant moves
 - No draw by repetition or 50-move rule
 
 ## Lessons learned
